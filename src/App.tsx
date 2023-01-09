@@ -1,5 +1,10 @@
+import { useEffect, useState } from 'react';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import './App.css';
+
+interface CreateChatGPTMessageResponse {
+  answer: string;
+}
 
 function App() {
   const {
@@ -7,11 +12,29 @@ function App() {
     isMicrophoneAvailable,
     transcript,
     listening,
+    finalTranscript,
   } = useSpeechRecognition();
+  const [answer, setAnswer] = useState('');
 
   const recognizeSpeech = () => {
     SpeechRecognition.startListening();
   };
+
+  useEffect(() => {
+    if (finalTranscript) {
+      fetch('http://localhost:8000/chatgpt/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ text: finalTranscript }),
+      })
+        .then((res) => res.json())
+        .then((res: CreateChatGPTMessageResponse) => {
+          setAnswer(res.answer);
+        });
+    }
+  }, [finalTranscript]);
 
   if (!browserSupportsSpeechRecognition) {
     return (
@@ -32,6 +55,10 @@ function App() {
       )}
 
       <div>Transcript: {transcript}</div>
+
+      {answer && (
+        <div>Answer: {answer}</div>
+      )}
     </div>
   );
 }
