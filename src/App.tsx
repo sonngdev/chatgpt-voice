@@ -32,6 +32,8 @@ function App() {
         .then((res) => res.json())
         .then((res: CreateChatGPTMessageResponse) => {
           setAnswer(res.answer);
+          const utterance = new SpeechSynthesisUtterance(res.answer);
+          window.speechSynthesis.speak(utterance);
         });
     }
   }, [finalTranscript]);
