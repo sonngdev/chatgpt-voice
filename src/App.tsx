@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
 import './App.css';
 
@@ -24,6 +24,12 @@ function App() {
     SpeechRecognition.startListening();
   };
 
+  const respondToUser = useCallback((response: string) => {
+    setAnswer(response);
+    const utterance = new SpeechSynthesisUtterance(response);
+    window.speechSynthesis.speak(utterance);
+  }, []);
+
   useEffect(() => {
     if (finalTranscript) {
       setIsProcessing(true);
@@ -41,18 +47,19 @@ function App() {
       })
         .then((res) => res.json())
         .then((res: CreateChatGPTMessageResponse) => {
-          setAnswer(res.answer);
           conversationRef.current.id = res.conversationId;
           conversationRef.current.currentMessageId = res.messageId;
-
-          const utterance = new SpeechSynthesisUtterance(res.answer);
-          window.speechSynthesis.speak(utterance);
+          respondToUser(res.answer);
+        })
+        .catch((err: unknown) => {
+          console.warn(err);
+          respondToUser('Failed to get the response, please try again');
         })
         .finally(() => {
           setIsProcessing(false);
         });
     }
-  }, [finalTranscript]);
+  }, [finalTranscript, respondToUser]);
 
   if (!browserSupportsSpeechRecognition) {
     return (
