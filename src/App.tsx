@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import SpeechRecognition, {
   useSpeechRecognition,
 } from 'react-speech-recognition';
-import { GitHub, Settings, Plus } from 'react-feather';
+import { GitHub, Settings, Plus, Mic, Info } from 'react-feather';
 import Button from './design_system/Button';
 
 interface CreateChatGPTMessageResponse {
@@ -95,13 +95,29 @@ function App() {
       </main>
 
       <div>
+        <div className="flex gap-x-3 mb-6">
+          <div className="shrink-0">
+            <Info strokeWidth={1} />
+          </div>
+          <div>
+            Run a local server on Desktop to see this works.{' '}
+            <a className="underline">It's easy</a>.
+          </div>
+        </div>
+
         <div className="flex justify-center items-center gap-x-8">
           <Button>
             <Settings strokeWidth={1} />
           </Button>
-          <button type="button" onClick={recognizeSpeech}>
-            Talk
+
+          <button
+            type="button"
+            className="w-16 h-16 bg-dark text-light flex justify-center items-center rounded-full"
+            onClick={recognizeSpeech}
+          >
+            <Mic strokeWidth={1} size={32} />
           </button>
+
           <Button>
             <Plus strokeWidth={1} />
           </Button>
