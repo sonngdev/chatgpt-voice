@@ -15,11 +15,12 @@ module.exports = {
       },
       animation: {
         blink: 'blink 2s infinite',
+        'spin-2': 'spin 2s linear infinite',
       },
       keyframes: {
         blink: {
           '0%, 100%': { opacity: 0 },
-          '50%': { opacity: 0.4 },
+          '50%': { opacity: 1 },
         },
       },
     },

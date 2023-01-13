@@ -2,7 +2,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import SpeechRecognition, {
   useSpeechRecognition,
 } from 'react-speech-recognition';
-import { GitHub, Settings, Plus, Mic, Info } from 'react-feather';
+import {
+  GitHub,
+  Settings,
+  Plus,
+  Mic,
+  Info,
+  Activity,
+  Loader,
+} from 'react-feather';
 import Button from './design_system/Button';
 import Message from './Message';
 
@@ -37,7 +45,12 @@ function App() {
   const bottomDivRef = useRef<HTMLDivElement>(null);
 
   const recognizeSpeech = () => {
-    SpeechRecognition.startListening();
+    if (isListening) {
+      SpeechRecognition.abortListening();
+    } else {
+      window.speechSynthesis.cancel();
+      SpeechRecognition.startListening();
+    }
   };
 
   const speak = useCallback((text: string) => {
@@ -119,7 +132,7 @@ function App() {
           ChatGPT
           <br />
           With Voice
-          <div className="inline-block w-4 h-7 ml-2 align-middle bg-dark animate-blink" />
+          <div className="inline-block w-4 h-7 ml-2 align-middle bg-dark/40 animate-blink" />
         </h1>
         <div className="mt-4 flex justify-center">
           <a href="https://github.com/thanhsonng/chatgpt-voice">
@@ -175,10 +188,27 @@ function App() {
 
           <button
             type="button"
-            className="w-16 h-16 bg-dark text-light flex justify-center items-center rounded-full"
+            className={`w-16 h-16 ${
+              isListening
+                ? 'bg-accent1'
+                : isProcessing
+                ? 'bg-accent2'
+                : 'bg-dark'
+            } text-light flex justify-center items-center rounded-full transition-colors`}
             onClick={recognizeSpeech}
+            disabled={isProcessing}
           >
-            <Mic strokeWidth={1} size={32} />
+            {isListening ? (
+              <div className="animate-blink">
+                <Activity strokeWidth={1} size={32} />
+              </div>
+            ) : isProcessing ? (
+              <div className="animate-spin-2">
+                <Loader strokeWidth={1} size={32} />
+              </div>
+            ) : (
+              <Mic strokeWidth={1} size={32} />
+            )}
           </button>
 
           <Button>
@@ -189,10 +219,6 @@ function App() {
         {!isMicrophoneAvailable && (
           <div>Please allow microphone permission for this app to work</div>
         )}
-
-        {isListening && <div>Listening...</div>}
-
-        {isProcessing && <div>Processing...</div>}
       </div>
     </div>
   );
