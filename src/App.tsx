@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
-import './App.css';
 
 interface CreateChatGPTMessageResponse {
   answer: string;
@@ -68,7 +67,16 @@ function App() {
   }
 
   return (
-    <div>
+    <div className="p-8">
+      <header>
+        <h1 className="font-title text-3xl text-center">
+          ChatGPT<br />
+          With Voice
+          <div className='inline-block w-4 h-7 ml-2 align-middle bg-dark animate-blink' />
+        </h1>
+
+      </header>
+
       {!isMicrophoneAvailable && (
         <div>Please allow microphone permission for this app to work</div>
       )}

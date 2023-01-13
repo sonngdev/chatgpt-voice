@@ -5,7 +5,27 @@ module.exports = {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        mono: ['DM Mono', 'monospace'],
+        title: ['Major Mono Display', 'monospace'],
+      },
+      colors: {
+        light: '#FFFCE8',
+        dark: '#191308',
+        accent1: '#028090',
+        accent2: '#C64191',
+      },
+      animation: {
+        blink: 'blink 1.2s infinite',
+      },
+      keyframes: {
+        blink: {
+          '0%, 100%': { opacity: 0 },
+          '50%': { opacity: 0.6 },
+        },
+      },
+    },
   },
   plugins: [],
 }
