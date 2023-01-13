@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
-import { GitHub } from 'react-feather';
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from 'react-speech-recognition';
+import { GitHub, Settings, Plus } from 'react-feather';
+import Button from './design_system/Button';
 
 interface CreateChatGPTMessageResponse {
   answer: string;
@@ -42,7 +45,8 @@ function App() {
         body: JSON.stringify({
           text: finalTranscript,
           conversationId: conversationRef.current.id || undefined,
-          parentMessageId: conversationRef.current.currentMessageId || undefined,
+          parentMessageId:
+            conversationRef.current.currentMessageId || undefined,
         }),
       })
         .then((res) => res.json())
@@ -63,15 +67,18 @@ function App() {
 
   if (!browserSupportsSpeechRecognition) {
     return (
-      <div>This browser doesn't support speech recognition. Please use Chrome.</div>
-    )
+      <div>
+        This browser doesn't support speech recognition. Please use Chrome.
+      </div>
+    );
   }
 
   return (
-    <div className="p-8 flex flex-col h-screen">
+    <div className="px-8 py-9 flex flex-col h-screen">
       <header>
         <h1 className="font-title text-3xl text-center">
-          ChatGPT<br />
+          ChatGPT
+          <br />
           With Voice
           <div className="inline-block w-4 h-7 ml-2 align-middle bg-dark animate-blink" />
         </h1>
@@ -84,29 +91,32 @@ function App() {
 
       <main className="flex-1">
         <div>Transcript: {transcript}</div>
-        {answer && (
-          <div>Answer: {answer}</div>
-        )}
+        {answer && <div>Answer: {answer}</div>}
       </main>
 
       <div>
-        <button type="button" onClick={recognizeSpeech}>Talk</button>
+        <div className="flex justify-center items-center gap-x-8">
+          <Button>
+            <Settings strokeWidth={1} />
+          </Button>
+          <button type="button" onClick={recognizeSpeech}>
+            Talk
+          </button>
+          <Button>
+            <Plus strokeWidth={1} />
+          </Button>
+        </div>
 
         {!isMicrophoneAvailable && (
           <div>Please allow microphone permission for this app to work</div>
         )}
 
-        {isListening && (
-          <div>Listening...</div>
-        )}
+        {isListening && <div>Listening...</div>}
 
-
-        {isProcessing && (
-          <div>Processing...</div>
-        )}
+        {isProcessing && <div>Processing...</div>}
       </div>
     </div>
   );
 }
 
-export default App
+export default App;
