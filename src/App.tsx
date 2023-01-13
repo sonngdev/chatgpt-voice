@@ -26,7 +26,6 @@ function App() {
     finalTranscript,
   } = useSpeechRecognition();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [answer, setAnswer] = useState('');
   const [messages, setMessages] = useState<Message[]>([
     { type: 'prompt', text: 'Where is the Empire State Building?' },
     {
@@ -35,19 +34,40 @@ function App() {
     },
   ]);
   const conversationRef = useRef({ id: '', currentMessageId: '' });
+  const bottomDivRef = useRef<HTMLDivElement>(null);
 
   const recognizeSpeech = () => {
     SpeechRecognition.startListening();
   };
 
   const respondToUser = useCallback((response: string) => {
-    setAnswer(response);
+    setMessages((oldMessages) => [
+      ...oldMessages,
+      { type: 'response', text: response },
+    ]);
     const utterance = new SpeechSynthesisUtterance(response);
     window.speechSynthesis.speak(utterance);
   }, []);
 
+  // Scroll to bottom when user is speaking a prompt
+  useEffect(() => {
+    if (isListening) {
+      bottomDivRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [isListening]);
+
+  // Scroll to bottom when there is a new response
+  useEffect(() => {
+    bottomDivRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages.length]);
+
   useEffect(() => {
     if (finalTranscript) {
+      setMessages((oldMessages) => [
+        ...oldMessages,
+        { type: 'prompt', text: finalTranscript },
+      ]);
+
       setIsProcessing(true);
 
       fetch('http://localhost:8000/chatgpt/messages', {
@@ -103,11 +123,25 @@ function App() {
       </header>
 
       <main className="flex-1 flex flex-col gap-y-4 overflow-y-auto">
-        {messages.map(({ type, text }) => (
-          <Message type={type} text={text} />
-        ))}
-        {isListening && <Message type="prompt" text={transcript} />}
-        {answer && <div>Answer: {answer}</div>}
+        {messages.map(({ type, text }, index) => {
+          const getIsActive = () => {
+            if (isListening) {
+              return false;
+            }
+            if (type === 'prompt') {
+              return (
+                index === messages.length - 1 || index === messages.length - 2
+              );
+            }
+            if (type === 'response') {
+              return index === messages.length - 1;
+            }
+            return false;
+          };
+          return <Message type={type} text={text} isActive={getIsActive()} />;
+        })}
+        {isListening && <Message type="prompt" text={transcript} isActive />}
+        <div ref={bottomDivRef} />
       </main>
 
       <div>

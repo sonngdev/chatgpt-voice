@@ -3,11 +3,16 @@ import { DollarSign, Terminal } from 'react-feather';
 interface MessageProps {
   type: 'prompt' | 'response';
   text: string;
+  isActive: boolean;
 }
 
-export default function Message({ type, text }: MessageProps) {
+export default function Message({ type, text, isActive }: MessageProps) {
   return (
-    <div className="flex gap-x-4">
+    <div
+      className={`${
+        isActive ? 'opacity-100' : 'opacity-20'
+      } flex gap-x-4 transition-opacity`}
+    >
       <div className="shrink-0 mt-1">
         {type === 'prompt' ? (
           <span className="text-accent1">
