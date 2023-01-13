@@ -40,12 +40,9 @@ function App() {
     SpeechRecognition.startListening();
   };
 
-  const respondToUser = useCallback((response: string) => {
-    setMessages((oldMessages) => [
-      ...oldMessages,
-      { type: 'response', text: response },
-    ]);
-    const utterance = new SpeechSynthesisUtterance(response);
+  const speak = useCallback((text: string) => {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
     window.speechSynthesis.speak(utterance);
   }, []);
 
@@ -86,17 +83,26 @@ function App() {
         .then((res: CreateChatGPTMessageResponse) => {
           conversationRef.current.id = res.conversationId;
           conversationRef.current.currentMessageId = res.messageId;
-          respondToUser(res.answer);
+          setMessages((oldMessages) => [
+            ...oldMessages,
+            { type: 'response', text: res.answer },
+          ]);
+          speak(res.answer);
         })
         .catch((err: unknown) => {
           console.warn(err);
-          respondToUser('Failed to get the response, please try again');
+          const response = 'Failed to get the response, please try again';
+          setMessages((oldMessages) => [
+            ...oldMessages,
+            { type: 'response', text: response },
+          ]);
+          speak(response);
         })
         .finally(() => {
           setIsProcessing(false);
         });
     }
-  }, [finalTranscript, respondToUser]);
+  }, [finalTranscript, speak]);
 
   if (!browserSupportsSpeechRecognition) {
     return (
@@ -138,7 +144,14 @@ function App() {
             }
             return false;
           };
-          return <Message type={type} text={text} isActive={getIsActive()} />;
+          return (
+            <Message
+              type={type}
+              text={text}
+              isActive={getIsActive()}
+              onClick={speak}
+            />
+          );
         })}
         {isListening && <Message type="prompt" text={transcript} isActive />}
         <div ref={bottomDivRef} />
