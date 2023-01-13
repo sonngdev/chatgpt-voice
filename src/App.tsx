@@ -4,11 +4,17 @@ import SpeechRecognition, {
 } from 'react-speech-recognition';
 import { GitHub, Settings, Plus, Mic, Info } from 'react-feather';
 import Button from './design_system/Button';
+import Message from './Message';
 
 interface CreateChatGPTMessageResponse {
   answer: string;
   conversationId: string;
   messageId: string;
+}
+
+interface Message {
+  type: 'prompt' | 'response';
+  text: string;
 }
 
 function App() {
@@ -21,6 +27,13 @@ function App() {
   } = useSpeechRecognition();
   const [isProcessing, setIsProcessing] = useState(false);
   const [answer, setAnswer] = useState('');
+  const [messages, setMessages] = useState<Message[]>([
+    { type: 'prompt', text: 'Where is the Empire State Building?' },
+    {
+      type: 'response',
+      text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet elementum quam. Mauris sit amet tincidunt lacus. Quisque nec commodo ante. Duis ullamcorper suscipit lacus, a feugiat mauris. Integer rhoncus erat consequat nisi cursus porttitor.',
+    },
+  ]);
   const conversationRef = useRef({ id: '', currentMessageId: '' });
 
   const recognizeSpeech = () => {
@@ -74,7 +87,7 @@ function App() {
   }
 
   return (
-    <div className="px-8 py-9 flex flex-col h-screen">
+    <div className="px-8 py-9 flex flex-col h-screen gap-y-4">
       <header>
         <h1 className="font-title text-3xl text-center">
           ChatGPT
@@ -89,8 +102,11 @@ function App() {
         </div>
       </header>
 
-      <main className="flex-1">
-        <div>Transcript: {transcript}</div>
+      <main className="flex-1 flex flex-col gap-y-4 overflow-y-auto">
+        {messages.map(({ type, text }) => (
+          <Message type={type} text={text} />
+        ))}
+        {isListening && <Message type="prompt" text={transcript} />}
         {answer && <div>Answer: {answer}</div>}
       </main>
 
