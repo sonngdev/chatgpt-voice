@@ -17,12 +17,12 @@ module.exports = {
         accent2: '#C64191',
       },
       animation: {
-        blink: 'blink 1.2s infinite',
+        blink: 'blink 2s infinite',
       },
       keyframes: {
         blink: {
           '0%, 100%': { opacity: 0 },
-          '50%': { opacity: 0.6 },
+          '50%': { opacity: 0.4 },
         },
       },
     },

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import SpeechRecognition, { useSpeechRecognition } from 'react-speech-recognition';
+import { GitHub } from 'react-feather';
 
 interface CreateChatGPTMessageResponse {
   answer: string;
@@ -67,35 +68,43 @@ function App() {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-8 flex flex-col h-screen">
       <header>
         <h1 className="font-title text-3xl text-center">
           ChatGPT<br />
           With Voice
-          <div className='inline-block w-4 h-7 ml-2 align-middle bg-dark animate-blink' />
+          <div className="inline-block w-4 h-7 ml-2 align-middle bg-dark animate-blink" />
         </h1>
-
+        <div className="mt-4 flex justify-center">
+          <a href="https://github.com/thanhsonng/chatgpt-voice">
+            <GitHub strokeWidth={1} />
+          </a>
+        </div>
       </header>
 
-      {!isMicrophoneAvailable && (
-        <div>Please allow microphone permission for this app to work</div>
-      )}
+      <main className="flex-1">
+        <div>Transcript: {transcript}</div>
+        {answer && (
+          <div>Answer: {answer}</div>
+        )}
+      </main>
 
-      <button type="button" onClick={recognizeSpeech}>Talk</button>
+      <div>
+        <button type="button" onClick={recognizeSpeech}>Talk</button>
 
-      {isListening && (
-        <div>Listening...</div>
-      )}
+        {!isMicrophoneAvailable && (
+          <div>Please allow microphone permission for this app to work</div>
+        )}
 
-      <div>Transcript: {transcript}</div>
+        {isListening && (
+          <div>Listening...</div>
+        )}
 
-      {isProcessing && (
-        <div>Processing...</div>
-      )}
 
-      {answer && (
-        <div>Answer: {answer}</div>
-      )}
+        {isProcessing && (
+          <div>Processing...</div>
+        )}
+      </div>
     </div>
   );
 }
