@@ -11,6 +11,10 @@
     @apply text-dark;
   }
 
+  body {
+    @apply text-sm;
+  }
+
   a {
     @apply underline;
     @apply underline-offset-2;
