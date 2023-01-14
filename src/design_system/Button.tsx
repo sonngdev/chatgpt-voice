@@ -39,7 +39,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
 
   const getClassNameFromVariant = () => {
     if (variant === 'outline') {
-      return 'border border-dark bg-transparent';
+      return 'border border-dark bg-transparent hover:opacity-60 focus:opacity-60';
     }
     return '';
   };
@@ -55,7 +55,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
     getClassNameFromSize(),
     getClassNameFromVariant(),
     getClassNameFromIconOnly(),
-    'flex justify-center items-center transition-opacity hover:opacity-60',
+    'flex justify-center items-center transition-opacity',
     className,
   ].join(' ');
 

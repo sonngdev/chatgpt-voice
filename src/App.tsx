@@ -15,7 +15,7 @@ import {
 } from 'react-feather';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import * as Dialog from '@radix-ui/react-dialog';
-import { isDesktop } from 'react-device-detect';
+import { isDesktop, isMobile } from 'react-device-detect';
 
 import Button from './design_system/Button';
 import SyntaxHighlighter from './design_system/SyntaxHighlighter';
@@ -94,6 +94,12 @@ function App() {
   useEffect(() => {
     bottomDivRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages.length]);
+
+  useEffect(() => {
+    if (!isServerSetUp && isDesktop) {
+      setIsTooltipVisible(true);
+    }
+  }, [isServerSetUp, isDesktop]);
 
   useEffect(() => {
     if (finalTranscript) {
@@ -217,7 +223,7 @@ function App() {
                 properly.
               </div>
             </div>
-          ) : !isServerSetUp ? (
+          ) : !isServerSetUp && isMobile ? (
             <div className="flex gap-x-3 mb-6">
               <div className="shrink-0">
                 <Info strokeWidth={1} />
@@ -275,7 +281,7 @@ function App() {
                 : isProcessing
                 ? 'bg-accent2'
                 : 'bg-dark'
-            } text-light flex justify-center items-center rounded-full transition-all hover:opacity-80`}
+            } text-light flex justify-center items-center rounded-full transition-all hover:opacity-80 focus:opacity-80`}
             onClick={recognizeSpeech}
             disabled={isProcessing}
             aria-label={
