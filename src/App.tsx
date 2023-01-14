@@ -156,12 +156,11 @@ function App() {
   }
 
   return (
-    <div className="px-8 py-9 flex flex-col h-screen gap-y-4">
-      <header>
-        <h1 className="font-title text-3xl text-center">
-          ChatGPT
-          <br />
-          With Voice
+    <div className="container mx-auto px-8 py-9 flex flex-col h-screen gap-y-4 lg:px-28 lg:py-12 lg:relative">
+      <header className="flex flex-col items-center lg:flex-row lg:justify-between">
+        {/* w-64 so text will break after ChatGPT */}
+        <h1 className="font-title text-3xl text-center w-64 lg:w-auto">
+          ChatGPT With Voice
           <div className="inline-block w-4 h-7 ml-2 align-middle bg-dark/40 animate-blink" />
         </h1>
         <div className="mt-4 flex justify-center">
@@ -171,7 +170,7 @@ function App() {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col gap-y-4 overflow-y-auto">
+      <main className="flex-1 flex flex-col gap-y-4 overflow-y-auto lg:mr-80">
         {messages.map(({ type, text }, index) => {
           const getIsActive = () => {
             if (isListening) {
@@ -202,28 +201,31 @@ function App() {
       </main>
 
       <div>
-        {!isMicrophoneAvailable ? (
-          <div className="flex gap-x-3 mb-6 text-red-700">
-            <div className="shrink-0">
-              <AlertTriangle strokeWidth={1} />
+        <div className="lg:absolute lg:right-28 lg:bottom-12 lg:w-72">
+          {!isMicrophoneAvailable ? (
+            <div className="flex gap-x-3 mb-6 text-red-700">
+              <div className="shrink-0">
+                <AlertTriangle strokeWidth={1} />
+              </div>
+              <div>
+                Please allow microphone permission for this app to work
+                properly.
+              </div>
             </div>
-            <div>
-              Please allow microphone permission for this app to work properly.
+          ) : !isServerSetUp ? (
+            <div className="flex gap-x-3 mb-6">
+              <div className="shrink-0">
+                <Info strokeWidth={1} />
+              </div>
+              <div>
+                Run a local server on Desktop to see this works.{' '}
+                <a onClick={() => setAreSettingsOpen(true)}>It's easy</a>.
+              </div>
             </div>
-          </div>
-        ) : !isServerSetUp ? (
-          <div className="flex gap-x-3 mb-6">
-            <div className="shrink-0">
-              <Info strokeWidth={1} />
-            </div>
-            <div>
-              Run a local server on Desktop to see this works.{' '}
-              <a onClick={() => setAreSettingsOpen(true)}>It's easy</a>.
-            </div>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
 
-        <div className="flex justify-center items-center gap-x-8">
+        <div className="flex justify-center items-center gap-x-8 lg:flex-col lg:gap-y-8 lg:absolute lg:top-1/2 lg:right-28 lg:-translate-y-1/2">
           {/* <Tooltip.Provider delayDuration={0}>
             <Tooltip.Root>
               <Tooltip.Trigger asChild>
