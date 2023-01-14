@@ -170,7 +170,7 @@ function App() {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col gap-y-4 overflow-y-auto lg:mr-80">
+      <main className="flex-1 flex flex-col gap-y-4 overflow-y-auto lg:mr-80 lg:gap-y-8">
         {messages.map(({ type, text }, index) => {
           const getIsActive = () => {
             if (isListening) {
