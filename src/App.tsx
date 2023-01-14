@@ -47,6 +47,7 @@ function App() {
       text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet elementum quam. Mauris sit amet tincidunt lacus. Quisque nec commodo ante. Duis ullamcorper suscipit lacus, a feugiat mauris. Integer rhoncus erat consequat nisi cursus porttitor.',
     },
   ]);
+  const [areSettingsOpen, setAreSettingsOpen] = useState(false);
   const conversationRef = useRef({ id: '', currentMessageId: '' });
   const bottomDivRef = useRef<HTMLDivElement>(null);
 
@@ -200,62 +201,6 @@ function App() {
         )}
 
         <div className="flex justify-center items-center gap-x-8">
-          <Dialog.Root>
-            <Dialog.Trigger asChild>
-              <Button aria-label="Settings">
-                <Settings strokeWidth={1} />
-              </Button>
-            </Dialog.Trigger>
-            <Dialog.Portal>
-              <Dialog.Overlay className="DialogOverlay" />
-              <Dialog.Content className="DialogContent">
-                <Dialog.Title className="DialogTitle">
-                  Edit profile
-                </Dialog.Title>
-                <Dialog.Description className="DialogDescription">
-                  Make changes to your profile here. Click save when you're
-                  done.
-                </Dialog.Description>
-                <fieldset className="Fieldset">
-                  <label className="Label" htmlFor="name">
-                    Name
-                  </label>
-                  <input
-                    className="Input"
-                    id="name"
-                    defaultValue="Pedro Duarte"
-                  />
-                </fieldset>
-                <fieldset className="Fieldset">
-                  <label className="Label" htmlFor="username">
-                    Username
-                  </label>
-                  <input
-                    className="Input"
-                    id="username"
-                    defaultValue="@peduarte"
-                  />
-                </fieldset>
-                <div
-                  style={{
-                    display: 'flex',
-                    marginTop: 25,
-                    justifyContent: 'flex-end',
-                  }}
-                >
-                  <Dialog.Close asChild>
-                    <button className="Button green">Save changes</button>
-                  </Dialog.Close>
-                </div>
-                <Dialog.Close asChild>
-                  <button className="IconButton" aria-label="Close">
-                    <X strokeWidth={1} />
-                  </button>
-                </Dialog.Close>
-              </Dialog.Content>
-            </Dialog.Portal>
-          </Dialog.Root>
-
           {/* <Tooltip.Provider delayDuration={0}>
             <Tooltip.Root>
               <Tooltip.Trigger asChild>
@@ -271,6 +216,13 @@ function App() {
               </Tooltip.Portal>
             </Tooltip.Root>
           </Tooltip.Provider> */}
+
+          <Button
+            aria-label="Settings"
+            onClick={() => setAreSettingsOpen(true)}
+          >
+            <Settings strokeWidth={1} />
+          </Button>
 
           <button
             type="button"
@@ -309,6 +261,47 @@ function App() {
           </Button>
         </div>
       </div>
+
+      {/* Settings modal */}
+      <Dialog.Root open={areSettingsOpen} onOpenChange={setAreSettingsOpen}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="DialogOverlay" />
+          <Dialog.Content className="DialogContent">
+            <Dialog.Title className="DialogTitle">Edit profile</Dialog.Title>
+            <Dialog.Description className="DialogDescription">
+              Make changes to your profile here. Click save when you're done.
+            </Dialog.Description>
+            <fieldset className="Fieldset">
+              <label className="Label" htmlFor="name">
+                Name
+              </label>
+              <input className="Input" id="name" defaultValue="Pedro Duarte" />
+            </fieldset>
+            <fieldset className="Fieldset">
+              <label className="Label" htmlFor="username">
+                Username
+              </label>
+              <input className="Input" id="username" defaultValue="@peduarte" />
+            </fieldset>
+            <div
+              style={{
+                display: 'flex',
+                marginTop: 25,
+                justifyContent: 'flex-end',
+              }}
+            >
+              <Dialog.Close asChild>
+                <button className="Button green">Save changes</button>
+              </Dialog.Close>
+            </div>
+            <Dialog.Close asChild>
+              <button className="IconButton" aria-label="Close">
+                <X strokeWidth={1} />
+              </button>
+            </Dialog.Close>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   );
 }
