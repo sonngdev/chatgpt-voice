@@ -47,7 +47,7 @@ function App() {
 
   const recognizeSpeech = () => {
     if (isListening) {
-      SpeechRecognition.abortListening();
+      SpeechRecognition.stopListening();
     } else {
       window.speechSynthesis.cancel();
       SpeechRecognition.startListening();
