@@ -15,9 +15,9 @@ import {
 } from 'react-feather';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import * as Dialog from '@radix-ui/react-dialog';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 
 import Button from './design_system/Button';
+import SyntaxHighlighter from './design_system/SyntaxHighlighter';
 import Message from './Message';
 import './App.css';
 
@@ -187,10 +187,7 @@ function App() {
             </div>
             <div>
               Run a local server on Desktop to see this works.{' '}
-              <a className="underline" onClick={() => setAreSettingsOpen(true)}>
-                It's easy
-              </a>
-              .
+              <a onClick={() => setAreSettingsOpen(true)}>It's easy</a>.
             </div>
           </div>
         ) : (
@@ -270,12 +267,12 @@ function App() {
       <Dialog.Root open={areSettingsOpen} onOpenChange={setAreSettingsOpen}>
         <Dialog.Portal>
           <Dialog.Overlay className="bg-dark/75 fixed inset-0 animate-fade-in" />
-          <Dialog.Content className="bg-light border border-dark rounded-lg shadow-md fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5/6 max-w-md max-h-4/5 p-6 animate-rise-up focus:outline-none overflow-y-auto">
+          <Dialog.Content className="bg-light border border-dark rounded-lg shadow-solid fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5/6 max-w-md max-h-4/5 p-6 animate-rise-up focus:outline-none overflow-y-auto">
             <Dialog.Title className="font-medium text-xl mb-4">
               Settings
             </Dialog.Title>
             <main>
-              <h2 className="text-lg font-medium mt-2">Step 1</h2>
+              <h2 className="text-lg font-medium mt-3">Step 1</h2>
               <p>
                 Clone <code>chatgpt-server</code> repo.
               </p>
@@ -283,14 +280,10 @@ function App() {
                 git clone https://github.com/thanhsonng/chatgpt-server.git
               </SyntaxHighlighter>
 
-              <h2 className="text-lg font-medium mt-2">Step 2</h2>
+              <h2 className="text-lg font-medium mt-3">Step 2</h2>
               <p>
                 Create <code>.env</code> file in the project's root. You need an{' '}
-                <a
-                  href="https://openai.com/api/"
-                  target="_blank"
-                  className="underline"
-                >
+                <a href="https://openai.com/api/" target="_blank">
                   OpenAI account
                 </a>
                 .
@@ -303,7 +296,7 @@ function App() {
                 ].join('\n')}
               </SyntaxHighlighter>
 
-              <h2 className="text-lg font-medium mt-2">Step 3</h2>
+              <h2 className="text-lg font-medium mt-3">Step 3</h2>
               <p>
                 Start the server - done! Make sure you are using Node 18 or
                 higher.

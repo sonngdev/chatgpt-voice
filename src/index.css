@@ -10,4 +10,13 @@
     @apply bg-light;
     @apply text-dark;
   }
+
+  a {
+    @apply underline;
+    @apply underline-offset-2;
+  }
+
+  code {
+    @apply text-accent2;
+  }
 }

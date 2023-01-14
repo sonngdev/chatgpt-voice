@@ -13,6 +13,9 @@ module.exports = {
         accent1: '#028090',
         accent2: '#C64191',
       },
+      boxShadow: {
+        solid: '3px 3px 0 #191308',
+      },
       animation: {
         blink: 'blink 2s infinite',
         'spin-2': 'spin 2s linear infinite',
