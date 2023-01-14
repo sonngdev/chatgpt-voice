@@ -7,7 +7,6 @@ import {
   Settings,
   FilePlus,
   Mic,
-  Info,
   Activity,
   Loader,
   AlertTriangle,
@@ -20,7 +19,6 @@ import { isDesktop, isMobile } from 'react-device-detect';
 import Button from './design_system/Button';
 import SyntaxHighlighter from './design_system/SyntaxHighlighter';
 import Message from './Message';
-import './App.css';
 
 interface CreateChatGPTMessageResponse {
   answer: string;
