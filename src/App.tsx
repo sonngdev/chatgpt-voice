@@ -12,8 +12,10 @@ import {
   Loader,
   AlertTriangle,
 } from 'react-feather';
+import * as Tooltip from '@radix-ui/react-tooltip';
 import Button from './design_system/Button';
 import Message from './Message';
+import './App.css';
 
 interface CreateChatGPTMessageResponse {
   answer: string;
@@ -195,9 +197,21 @@ function App() {
         )}
 
         <div className="flex justify-center items-center gap-x-8">
-          <Button>
-            <Settings strokeWidth={1} />
-          </Button>
+          <Tooltip.Provider delayDuration={0}>
+            <Tooltip.Root>
+              <Tooltip.Trigger asChild>
+                <Button>
+                  <Settings strokeWidth={1} />
+                </Button>
+              </Tooltip.Trigger>
+              <Tooltip.Portal>
+                <Tooltip.Content className="TooltipContent" sideOffset={5}>
+                  Add to library
+                  <Tooltip.Arrow className="TooltipArrow" />
+                </Tooltip.Content>
+              </Tooltip.Portal>
+            </Tooltip.Root>
+          </Tooltip.Provider>
 
           <button
             type="button"

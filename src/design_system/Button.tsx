@@ -1,10 +1,13 @@
-import { forwardRef, ReactNode } from 'react';
+import { ButtonHTMLAttributes, DetailedHTMLProps, forwardRef } from 'react';
 
-interface ButtonProps {
+interface ButtonProps
+  extends DetailedHTMLProps<
+    ButtonHTMLAttributes<HTMLButtonElement>,
+    HTMLButtonElement
+  > {
   size?: 'large' | 'normal' | 'small';
   variant?: 'outline' | 'solid';
   iconOnly?: boolean;
-  children: ReactNode;
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
@@ -12,7 +15,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
     size = 'normal',
     variant = 'outline',
     iconOnly = true,
-    children,
+    className = '',
+    ...rest
   } = props;
 
   const getClassNameFromSize = () => {
@@ -40,21 +44,15 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
     return '';
   };
 
-  const className = [
+  const cn = [
     getClassNameFromSize(),
     getClassNameFromVariant(),
     getClassNameFromIconOnly(),
+    'flex justify-center items-center',
+    className,
   ].join(' ');
 
-  return (
-    <button
-      ref={ref}
-      type="button"
-      className={`${className} flex justify-center items-center`}
-    >
-      {children}
-    </button>
-  );
+  return <button ref={ref} type="button" className={cn} {...rest} />;
 });
 
 export default Button;
