@@ -267,7 +267,7 @@ function App() {
       <Dialog.Root open={areSettingsOpen} onOpenChange={setAreSettingsOpen}>
         <Dialog.Portal>
           <Dialog.Overlay className="bg-dark/75 fixed inset-0 animate-fade-in" />
-          <Dialog.Content className="bg-light border border-dark rounded-lg shadow-solid fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5/6 max-w-md max-h-4/5 p-6 animate-rise-up focus:outline-none overflow-y-auto">
+          <Dialog.Content className="bg-light border border-dark rounded-lg shadow-solid fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5/6 max-w-md max-h-screen p-6 animate-rise-up focus:outline-none overflow-y-auto">
             <Dialog.Title className="font-medium text-xl mb-4">
               Settings
             </Dialog.Title>
