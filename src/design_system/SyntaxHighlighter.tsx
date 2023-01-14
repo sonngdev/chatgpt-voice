@@ -162,5 +162,6 @@ const defaultStyle = {
 
 export default function SyntaxHighlighter(props: SHProps) {
   const { style = defaultStyle, ...rest } = props;
+  // @ts-ignore
   return <SH style={style} {...rest} />;
 }
