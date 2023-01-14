@@ -27,6 +27,13 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
       }
       return cn;
     }
+    if (size === 'small') {
+      let cn = 'w-6';
+      if (iconOnly) {
+        cn += ' h-6';
+      }
+      return cn;
+    }
     return '';
   };
 
