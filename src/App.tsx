@@ -158,7 +158,7 @@ function App() {
 
   return (
     <div className="container mx-auto px-8 py-9 flex flex-col h-screen gap-y-4 lg:px-28 lg:py-12 lg:relative">
-      <header className="flex flex-col items-center lg:flex-row lg:justify-between">
+      <header className="flex flex-col items-center lg:flex-row lg:justify-between lg:mb-4">
         {/* w-64 so text will break after ChatGPT */}
         <h1 className="font-title text-3xl text-center w-64 lg:w-auto">
           ChatGPT With Voice
