@@ -19,6 +19,7 @@ import { isDesktop, isMobile } from 'react-device-detect';
 import Button from './design_system/Button';
 import SyntaxHighlighter from './design_system/SyntaxHighlighter';
 import Message from './Message';
+import * as Storage from './storage';
 
 interface CreateChatGPTMessageResponse {
   answer: string;
@@ -35,6 +36,12 @@ const initialMessages: Message[] = [
   { type: 'response', text: 'Try speaking to the microphone.' },
 ];
 
+const savedData = Storage.load();
+const initialSettings = {
+  host: (savedData?.host as string) || 'http://localhost',
+  port: (savedData?.port as number) || 8000,
+};
+
 function App() {
   const {
     browserSupportsSpeechRecognition,
@@ -45,10 +52,7 @@ function App() {
   } = useSpeechRecognition();
   const [isProcessing, setIsProcessing] = useState(false);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
-  const [settings, setSettings] = useState({
-    host: 'http://localhost',
-    port: 8000,
-  });
+  const [settings, setSettings] = useState(initialSettings);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isTooltipVisible, setIsTooltipVisible] = useState(true);
   const abortRef = useRef<AbortController | null>(null);
@@ -355,6 +359,9 @@ function App() {
                       onChange={(e) =>
                         setSettings({ ...settings, host: e.target.value })
                       }
+                      onBlur={() => {
+                        Storage.save(settings);
+                      }}
                       className="border border-dark rounded-md bg-transparent px-3 py-2"
                     />
                   </fieldset>
@@ -370,6 +377,9 @@ function App() {
                           port: Number(e.target.value),
                         })
                       }
+                      onBlur={() => {
+                        Storage.save(settings);
+                      }}
                       className="border border-dark rounded-md bg-transparent px-3 py-2"
                     />
                   </fieldset>
