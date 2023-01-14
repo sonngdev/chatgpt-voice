@@ -55,7 +55,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
     getClassNameFromSize(),
     getClassNameFromVariant(),
     getClassNameFromIconOnly(),
-    'flex justify-center items-center',
+    'flex justify-center items-center transition-opacity hover:opacity-60',
     className,
   ].join(' ');
 

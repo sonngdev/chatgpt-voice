@@ -257,7 +257,7 @@ function App() {
                 : isProcessing
                 ? 'bg-accent2'
                 : 'bg-dark'
-            } text-light flex justify-center items-center rounded-full transition-colors`}
+            } text-light flex justify-center items-center rounded-full transition-all hover:opacity-80`}
             onClick={recognizeSpeech}
             disabled={isProcessing}
             aria-label={

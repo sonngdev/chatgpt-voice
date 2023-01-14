@@ -18,6 +18,7 @@
   a {
     @apply underline;
     @apply underline-offset-2;
+    @apply cursor-pointer;
   }
 
   code {
