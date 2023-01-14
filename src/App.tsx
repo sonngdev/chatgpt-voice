@@ -172,7 +172,7 @@ function App() {
           ChatGPT With Voice
           <div className="inline-block w-4 h-7 ml-2 align-middle bg-dark/40 animate-blink" />
         </h1>
-        <div className="mt-4 flex justify-center">
+        <div className="mt-4 flex justify-center lg:px-2">
           <a href="https://github.com/thanhsonng/chatgpt-voice" target="_blank">
             <GitHub strokeWidth={1} />
           </a>
