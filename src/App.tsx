@@ -15,6 +15,7 @@ import {
 } from 'react-feather';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import * as Dialog from '@radix-ui/react-dialog';
+import { isMobile } from 'react-device-detect';
 
 import Button from './design_system/Button';
 import SyntaxHighlighter from './design_system/SyntaxHighlighter';
@@ -47,6 +48,7 @@ function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [areSettingsOpen, setAreSettingsOpen] = useState(false);
+  const [isServerSetUp, setIsServerSetUp] = useState(!isMobile);
   const abortRef = useRef<AbortController | null>(null);
   const conversationRef = useRef({ id: '', currentMessageId: '' });
   const bottomDivRef = useRef<HTMLDivElement>(null);
@@ -95,6 +97,7 @@ function App() {
         { type: 'prompt', text: finalTranscript },
       ]);
       setIsProcessing(true);
+      setIsServerSetUp(true);
 
       abortRef.current = new AbortController();
       fetch('http://localhost:8000/chatgpt/messages', {
@@ -122,7 +125,16 @@ function App() {
         })
         .catch((err: unknown) => {
           console.warn(err);
-          const response = 'Failed to get the response, please try again.';
+          let response: string;
+
+          // Connection refused
+          if (err instanceof TypeError) {
+            response =
+              'Local server needs to be set up first. Click on the Settings button to see how.';
+            setIsServerSetUp(false);
+          } else {
+            response = 'Failed to get the response, please try again.';
+          }
           setMessages((oldMessages) => [
             ...oldMessages,
             { type: 'response', text: response },
@@ -190,7 +202,16 @@ function App() {
       </main>
 
       <div>
-        {isMicrophoneAvailable ? (
+        {!isMicrophoneAvailable ? (
+          <div className="flex gap-x-3 mb-6 text-red-700">
+            <div className="shrink-0">
+              <AlertTriangle strokeWidth={1} />
+            </div>
+            <div>
+              Please allow microphone permission for this app to work properly.
+            </div>
+          </div>
+        ) : !isServerSetUp ? (
           <div className="flex gap-x-3 mb-6">
             <div className="shrink-0">
               <Info strokeWidth={1} />
@@ -200,16 +221,7 @@ function App() {
               <a onClick={() => setAreSettingsOpen(true)}>It's easy</a>.
             </div>
           </div>
-        ) : (
-          <div className="flex gap-x-3 mb-6 text-red-700">
-            <div className="shrink-0">
-              <AlertTriangle strokeWidth={1} />
-            </div>
-            <div>
-              Please allow microphone permission for this app to work properly.
-            </div>
-          </div>
-        )}
+        ) : null}
 
         <div className="flex justify-center items-center gap-x-8">
           {/* <Tooltip.Provider delayDuration={0}>
