@@ -11,8 +11,11 @@ import {
   Activity,
   Loader,
   AlertTriangle,
+  X,
 } from 'react-feather';
 import * as Tooltip from '@radix-ui/react-tooltip';
+import * as Dialog from '@radix-ui/react-dialog';
+
 import Button from './design_system/Button';
 import Message from './Message';
 import './App.css';
@@ -197,10 +200,66 @@ function App() {
         )}
 
         <div className="flex justify-center items-center gap-x-8">
-          <Tooltip.Provider delayDuration={0}>
+          <Dialog.Root>
+            <Dialog.Trigger asChild>
+              <Button aria-label="Settings">
+                <Settings strokeWidth={1} />
+              </Button>
+            </Dialog.Trigger>
+            <Dialog.Portal>
+              <Dialog.Overlay className="DialogOverlay" />
+              <Dialog.Content className="DialogContent">
+                <Dialog.Title className="DialogTitle">
+                  Edit profile
+                </Dialog.Title>
+                <Dialog.Description className="DialogDescription">
+                  Make changes to your profile here. Click save when you're
+                  done.
+                </Dialog.Description>
+                <fieldset className="Fieldset">
+                  <label className="Label" htmlFor="name">
+                    Name
+                  </label>
+                  <input
+                    className="Input"
+                    id="name"
+                    defaultValue="Pedro Duarte"
+                  />
+                </fieldset>
+                <fieldset className="Fieldset">
+                  <label className="Label" htmlFor="username">
+                    Username
+                  </label>
+                  <input
+                    className="Input"
+                    id="username"
+                    defaultValue="@peduarte"
+                  />
+                </fieldset>
+                <div
+                  style={{
+                    display: 'flex',
+                    marginTop: 25,
+                    justifyContent: 'flex-end',
+                  }}
+                >
+                  <Dialog.Close asChild>
+                    <button className="Button green">Save changes</button>
+                  </Dialog.Close>
+                </div>
+                <Dialog.Close asChild>
+                  <button className="IconButton" aria-label="Close">
+                    <X strokeWidth={1} />
+                  </button>
+                </Dialog.Close>
+              </Dialog.Content>
+            </Dialog.Portal>
+          </Dialog.Root>
+
+          {/* <Tooltip.Provider delayDuration={0}>
             <Tooltip.Root>
               <Tooltip.Trigger asChild>
-                <Button>
+                <Button aria-label="Settings">
                   <Settings strokeWidth={1} />
                 </Button>
               </Tooltip.Trigger>
@@ -211,7 +270,7 @@ function App() {
                 </Tooltip.Content>
               </Tooltip.Portal>
             </Tooltip.Root>
-          </Tooltip.Provider>
+          </Tooltip.Provider> */}
 
           <button
             type="button"
@@ -224,6 +283,13 @@ function App() {
             } text-light flex justify-center items-center rounded-full transition-colors`}
             onClick={recognizeSpeech}
             disabled={isProcessing}
+            aria-label={
+              isListening
+                ? 'Listening'
+                : isProcessing
+                ? 'Processing'
+                : 'Start speaking'
+            }
           >
             {isListening ? (
               <div className="animate-blink">
@@ -238,7 +304,7 @@ function App() {
             )}
           </button>
 
-          <Button>
+          <Button aria-label="New conversation">
             <Plus strokeWidth={1} />
           </Button>
         </div>
