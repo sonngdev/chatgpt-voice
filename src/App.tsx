@@ -52,8 +52,7 @@ function App() {
     port: 8000,
   });
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isTooltipVisible, setIsTooltipVisible] = useState(isDesktop);
-  const [isServerSetUp, setIsServerSetUp] = useState(isDesktop);
+  const [isTooltipVisible, setIsTooltipVisible] = useState(true);
   const abortRef = useRef<AbortController | null>(null);
   const conversationRef = useRef({ id: '', currentMessageId: '' });
   const bottomDivRef = useRef<HTMLDivElement>(null);
@@ -96,19 +95,12 @@ function App() {
   }, [messages.length]);
 
   useEffect(() => {
-    if (!isServerSetUp && isDesktop) {
-      setIsTooltipVisible(true);
-    }
-  }, [isServerSetUp, isDesktop]);
-
-  useEffect(() => {
     if (finalTranscript) {
       setMessages((oldMessages) => [
         ...oldMessages,
         { type: 'prompt', text: finalTranscript },
       ]);
       setIsProcessing(true);
-      setIsServerSetUp(true);
 
       abortRef.current = new AbortController();
       fetch(`${settings.host}:${settings.port}/chatgpt/messages`, {
@@ -142,7 +134,7 @@ function App() {
           if (err instanceof TypeError) {
             response =
               'Local server needs to be set up first. Click on the Settings button to see how.';
-            setIsServerSetUp(false);
+            setIsTooltipVisible(true);
           } else {
             response = 'Failed to get the response, please try again.';
           }
@@ -213,7 +205,7 @@ function App() {
 
       <div>
         <div className="lg:absolute lg:right-28 lg:bottom-12 lg:w-72">
-          {!isMicrophoneAvailable ? (
+          {!isMicrophoneAvailable && (
             <div className="flex gap-x-3 mb-6 text-red-700">
               <div className="shrink-0">
                 <AlertTriangle strokeWidth={1} />
@@ -223,17 +215,7 @@ function App() {
                 properly.
               </div>
             </div>
-          ) : !isServerSetUp && isMobile ? (
-            <div className="flex gap-x-3 mb-6">
-              <div className="shrink-0">
-                <Info strokeWidth={1} />
-              </div>
-              <div>
-                Run a local server on Desktop to see this works.{' '}
-                <a onClick={() => setIsModalVisible(true)}>It's easy</a>.
-              </div>
-            </div>
-          ) : null}
+          )}
         </div>
 
         <div className="flex justify-center items-center gap-x-8 lg:flex-col lg:gap-y-8 lg:absolute lg:top-1/2 lg:right-28 lg:-translate-y-1/2">
@@ -254,11 +236,14 @@ function App() {
                 </Tooltip.Trigger>
                 <Tooltip.Portal>
                   <Tooltip.Content
-                    className="rounded-md px-4 py-3 bg-light border border-dark shadow-solid select-none animate-fade-in"
-                    sideOffset={5}
-                    align="end"
+                    className="rounded-md px-4 py-3 max-w-xs bg-light border border-dark shadow-solid select-none animate-fade-in"
+                    sideOffset={isMobile ? 15 : 10}
+                    align={isMobile ? 'start' : 'end'}
+                    alignOffset={isMobile ? -50 : 0}
                   >
-                    Set up local server first.
+                    {isMobile
+                      ? 'Run a local server on Desktop to see this works.'
+                      : 'Set up local server first.'}
                     <Tooltip.Arrow className="fill-light relative -top-px" />
                   </Tooltip.Content>
                 </Tooltip.Portal>
