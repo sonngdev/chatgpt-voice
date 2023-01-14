@@ -160,6 +160,7 @@ function App() {
           };
           return (
             <Message
+              key={text}
               type={type}
               text={text}
               isActive={getIsActive()}
