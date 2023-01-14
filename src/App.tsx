@@ -15,7 +15,7 @@ import {
 } from 'react-feather';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import * as Dialog from '@radix-ui/react-dialog';
-import { isMobile } from 'react-device-detect';
+import { isDesktop } from 'react-device-detect';
 
 import Button from './design_system/Button';
 import SyntaxHighlighter from './design_system/SyntaxHighlighter';
@@ -48,7 +48,8 @@ function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [areSettingsOpen, setAreSettingsOpen] = useState(false);
-  const [isServerSetUp, setIsServerSetUp] = useState(!isMobile);
+  const [isTooltipVisible, setIsTooltipVisible] = useState(isDesktop);
+  const [isServerSetUp, setIsServerSetUp] = useState(isDesktop);
   const abortRef = useRef<AbortController | null>(null);
   const conversationRef = useRef({ id: '', currentMessageId: '' });
   const bottomDivRef = useRef<HTMLDivElement>(null);
@@ -226,28 +227,41 @@ function App() {
         </div>
 
         <div className="flex justify-center items-center gap-x-8 lg:flex-col lg:gap-y-8 lg:absolute lg:top-1/2 lg:right-28 lg:-translate-y-1/2">
-          {/* <Tooltip.Provider delayDuration={0}>
-            <Tooltip.Root>
-              <Tooltip.Trigger asChild>
-                <Button aria-label="Settings">
-                  <Settings strokeWidth={1} />
-                </Button>
-              </Tooltip.Trigger>
-              <Tooltip.Portal>
-                <Tooltip.Content className="TooltipContent" sideOffset={5}>
-                  Add to library
-                  <Tooltip.Arrow className="TooltipArrow" />
-                </Tooltip.Content>
-              </Tooltip.Portal>
-            </Tooltip.Root>
-          </Tooltip.Provider> */}
+          <div>
+            {/**
+             * We want a tooltip that positions itself against the Settings button.
+             * However, we don't want the tooltip to display each time we hover on it.
+             * So, an invisible div that is right on top of the Settings button is
+             * used here as the tooltip's target.
+             */}
+            <Tooltip.Provider delayDuration={0}>
+              <Tooltip.Root
+                open={isTooltipVisible}
+                onOpenChange={setIsTooltipVisible}
+              >
+                <Tooltip.Trigger asChild>
+                  <div />
+                </Tooltip.Trigger>
+                <Tooltip.Portal>
+                  <Tooltip.Content
+                    className="rounded-md px-4 py-3 bg-light border border-dark shadow-solid select-none animate-fade-in"
+                    sideOffset={5}
+                    align="end"
+                  >
+                    Set up local server first.
+                    <Tooltip.Arrow className="fill-light relative -top-px" />
+                  </Tooltip.Content>
+                </Tooltip.Portal>
+              </Tooltip.Root>
+            </Tooltip.Provider>
 
-          <Button
-            aria-label="Settings"
-            onClick={() => setAreSettingsOpen(true)}
-          >
-            <Settings strokeWidth={1} />
-          </Button>
+            <Button
+              aria-label="Settings"
+              onClick={() => setAreSettingsOpen(true)}
+            >
+              <Settings strokeWidth={1} />
+            </Button>
+          </div>
 
           <button
             type="button"
