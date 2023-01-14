@@ -37,9 +37,13 @@ const initialMessages: Message[] = [
 ];
 
 const savedData = Storage.load();
+const defaultSettings = {
+  host: 'http://localhost',
+  port: 8000,
+};
 const initialSettings = {
-  host: (savedData?.host as string) || 'http://localhost',
-  port: (savedData?.port as number) || 8000,
+  host: (savedData?.host as string) || defaultSettings.host,
+  port: (savedData?.port as number) || defaultSettings.port,
 };
 
 function App() {
@@ -388,6 +392,15 @@ function App() {
                     This app will find the server at{' '}
                     {`${settings.host}:${settings.port}`}
                   </small>
+
+                  <Button
+                    type="reset"
+                    className="mt-4 text-red-700 border-red-700"
+                    iconOnly={false}
+                    onClick={() => setSettings(defaultSettings)}
+                  >
+                    Reset to defaults
+                  </Button>
                 </div>
               )}
             </main>

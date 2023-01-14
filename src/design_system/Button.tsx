@@ -21,18 +21,16 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
 
   const getClassNameFromSize = () => {
     if (size === 'normal') {
-      let cn = 'w-11';
       if (iconOnly) {
-        cn += ' h-11';
+        return 'w-11 h-11';
       }
-      return cn;
+      return 'px-3 py-2 rounded-md';
     }
     if (size === 'small') {
-      let cn = 'w-6';
       if (iconOnly) {
-        cn += ' h-6';
+        return 'w-6 h-6';
       }
-      return cn;
+      return 'px-2 py-1 text-xs rounded-sm';
     }
     return '';
   };
@@ -59,7 +57,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
     className,
   ].join(' ');
 
-  return <button ref={ref} type="button" className={cn} {...rest} />;
+  return <button ref={ref} className={cn} {...rest} />;
 });
 
 export default Button;

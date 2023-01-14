@@ -1,7 +1,7 @@
 const LOCAL_STORAGE_KEY = 'CHATGPT_WITH_VOICE';
 
 interface PersistableData {
-  [key: string]: string | number;
+  [key: string]: any;
 }
 
 export function save(data: PersistableData) {
