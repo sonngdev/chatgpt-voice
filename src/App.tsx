@@ -10,6 +10,7 @@ import {
   Info,
   Activity,
   Loader,
+  AlertTriangle,
 } from 'react-feather';
 import Button from './design_system/Button';
 import Message from './Message';
@@ -171,15 +172,26 @@ function App() {
       </main>
 
       <div>
-        <div className="flex gap-x-3 mb-6">
-          <div className="shrink-0">
-            <Info strokeWidth={1} />
+        {isMicrophoneAvailable ? (
+          <div className="flex gap-x-3 mb-6">
+            <div className="shrink-0">
+              <Info strokeWidth={1} />
+            </div>
+            <div>
+              Run a local server on Desktop to see this works.{' '}
+              <a className="underline">It's easy</a>.
+            </div>
           </div>
-          <div>
-            Run a local server on Desktop to see this works.{' '}
-            <a className="underline">It's easy</a>.
+        ) : (
+          <div className="flex gap-x-3 mb-6 text-red-700">
+            <div className="shrink-0">
+              <AlertTriangle strokeWidth={1} />
+            </div>
+            <div>
+              Please allow microphone permission for this app to work properly.
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="flex justify-center items-center gap-x-8">
           <Button>
@@ -215,10 +227,6 @@ function App() {
             <Plus strokeWidth={1} />
           </Button>
         </div>
-
-        {!isMicrophoneAvailable && (
-          <div>Please allow microphone permission for this app to work</div>
-        )}
       </div>
     </div>
   );
