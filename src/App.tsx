@@ -47,7 +47,11 @@ function App() {
   } = useSpeechRecognition();
   const [isProcessing, setIsProcessing] = useState(false);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
-  const [areSettingsOpen, setAreSettingsOpen] = useState(false);
+  const [settings, setSettings] = useState({
+    host: 'http://localhost',
+    port: 8000,
+  });
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [isTooltipVisible, setIsTooltipVisible] = useState(isDesktop);
   const [isServerSetUp, setIsServerSetUp] = useState(isDesktop);
   const abortRef = useRef<AbortController | null>(null);
@@ -101,7 +105,7 @@ function App() {
       setIsServerSetUp(true);
 
       abortRef.current = new AbortController();
-      fetch('http://localhost:8000/chatgpt/messages', {
+      fetch(`${settings.host}:${settings.port}/chatgpt/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -146,7 +150,7 @@ function App() {
           setIsProcessing(false);
         });
     }
-  }, [finalTranscript, speak]);
+  }, [finalTranscript, settings, speak]);
 
   if (!browserSupportsSpeechRecognition) {
     return (
@@ -220,7 +224,7 @@ function App() {
               </div>
               <div>
                 Run a local server on Desktop to see this works.{' '}
-                <a onClick={() => setAreSettingsOpen(true)}>It's easy</a>.
+                <a onClick={() => setIsModalVisible(true)}>It's easy</a>.
               </div>
             </div>
           ) : null}
@@ -257,7 +261,7 @@ function App() {
 
             <Button
               aria-label="Settings"
-              onClick={() => setAreSettingsOpen(true)}
+              onClick={() => setIsModalVisible(true)}
             >
               <Settings strokeWidth={1} />
             </Button>
@@ -302,73 +306,93 @@ function App() {
       </div>
 
       {/* Settings modal */}
-      <Dialog.Root open={areSettingsOpen} onOpenChange={setAreSettingsOpen}>
+      <Dialog.Root open={isModalVisible} onOpenChange={setIsModalVisible}>
         <Dialog.Portal>
           <Dialog.Overlay className="bg-dark/75 fixed inset-0 animate-fade-in" />
-          <Dialog.Content className="bg-light border border-dark rounded-lg shadow-solid fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5/6 max-w-md max-h-screen p-6 animate-rise-up focus:outline-none overflow-y-auto">
+          <Dialog.Content className="bg-light border border-dark rounded-lg shadow-solid fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5/6 max-w-md max-h-screen p-6 animate-rise-up focus:outline-none overflow-y-auto lg:max-w-5xl">
             <Dialog.Title className="font-medium text-xl mb-4">
-              Settings
+              Help
             </Dialog.Title>
-            <main>
-              <h2 className="text-lg font-medium mt-3">Step 1</h2>
-              <p>
-                Clone <code>chatgpt-server</code> repo.
-              </p>
-              <SyntaxHighlighter language="bash">
-                git clone https://github.com/thanhsonng/chatgpt-server.git
-              </SyntaxHighlighter>
-
-              <h2 className="text-lg font-medium mt-3">Step 2</h2>
-              <p>
-                Create <code>.env</code> file in the project's root. You need an{' '}
-                <a href="https://openai.com/api/" target="_blank">
-                  OpenAI account
-                </a>
-                .
-              </p>
-              <SyntaxHighlighter language="bash">
-                {[
-                  'PORT=8000 # Or whichever port available',
-                  'OPENAI_EMAIL="<your-openai-email>"',
-                  'OPENAI_PASSWORD="<your-openai-password>"',
-                ].join('\n')}
-              </SyntaxHighlighter>
-
-              <h2 className="text-lg font-medium mt-3">Step 3</h2>
-              <p>
-                Start the server - done! Make sure you are using Node 18 or
-                higher.
-              </p>
-              <SyntaxHighlighter language="bash">
-                {['npm install', 'npm run build', 'npm run start'].join('\n')}
-              </SyntaxHighlighter>
-            </main>
-            {/* <Dialog.Description className="DialogDescription">
-              Make changes to your profile here. Click save when you're done.
+            <Dialog.Description>
+              Set up local server on Desktop in 3 easy steps.
             </Dialog.Description>
-            <fieldset className="Fieldset">
-              <label className="Label" htmlFor="name">
-                Name
-              </label>
-              <input className="Input" id="name" defaultValue="Pedro Duarte" />
-            </fieldset>
-            <fieldset className="Fieldset">
-              <label className="Label" htmlFor="username">
-                Username
-              </label>
-              <input className="Input" id="username" defaultValue="@peduarte" />
-            </fieldset>
-            <div
-              style={{
-                display: 'flex',
-                marginTop: 25,
-                justifyContent: 'flex-end',
-              }}
-            >
-              <Dialog.Close asChild>
-                <button className="Button green">Save changes</button>
-              </Dialog.Close>
-            </div> */}
+
+            <main className="lg:flex lg:gap-x-12">
+              <div>
+                <h3 className="text-lg font-medium mt-3">Step 1</h3>
+                <p>
+                  Clone <code>chatgpt-server</code> repo.
+                </p>
+                <SyntaxHighlighter language="bash">
+                  git clone https://github.com/thanhsonng/chatgpt-server.git
+                </SyntaxHighlighter>
+
+                <h3 className="text-lg font-medium mt-3">Step 2</h3>
+                <p>
+                  Create <code>.env</code> file in the project's root. You need
+                  an{' '}
+                  <a href="https://openai.com/api/" target="_blank">
+                    OpenAI account
+                  </a>
+                  .
+                </p>
+                <SyntaxHighlighter language="bash">
+                  {[
+                    'PORT=8000 # Or whichever port available',
+                    'OPENAI_EMAIL="<your-openai-email>"',
+                    'OPENAI_PASSWORD="<your-openai-password>"',
+                  ].join('\n')}
+                </SyntaxHighlighter>
+
+                <h3 className="text-lg font-medium mt-3">Step 3</h3>
+                <p>
+                  Start the server - done! Make sure you are using Node 18 or
+                  higher.
+                </p>
+                <SyntaxHighlighter language="bash">
+                  {['npm install', 'npm run build', 'npm run start'].join('\n')}
+                </SyntaxHighlighter>
+              </div>
+
+              {isDesktop && (
+                <div className="lg:w-full">
+                  <h3 className="text-lg font-medium mt-3">Settings</h3>
+
+                  <fieldset className="flex flex-col mt-2">
+                    <label htmlFor="host">Host</label>
+                    <input
+                      id="host"
+                      value={settings.host}
+                      onChange={(e) =>
+                        setSettings({ ...settings, host: e.target.value })
+                      }
+                      className="border border-dark rounded-md bg-transparent px-3 py-2"
+                    />
+                  </fieldset>
+                  <fieldset className="flex flex-col mt-4">
+                    <label htmlFor="port">Port</label>
+                    <input
+                      id="port"
+                      type="number"
+                      value={settings.port}
+                      onChange={(e) =>
+                        setSettings({
+                          ...settings,
+                          port: Number(e.target.value),
+                        })
+                      }
+                      className="border border-dark rounded-md bg-transparent px-3 py-2"
+                    />
+                  </fieldset>
+
+                  <small className="block mt-4">
+                    This app will find the server at{' '}
+                    {`${settings.host}:${settings.port}`}
+                  </small>
+                </div>
+              )}
+            </main>
+
             <Dialog.Close asChild>
               <Button
                 className="absolute top-6 right-6"

@@ -44,7 +44,7 @@ const defaultStyle = {
     padding: '0.5em',
     margin: '.5em 0',
     overflow: 'auto',
-    borderRadius: '0.3em',
+    borderRadius: '0.375em',
     background: 'transparent',
     border: 'solid 1px #191308', // Dark
   },
