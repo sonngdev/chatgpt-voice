@@ -5,7 +5,7 @@ import SpeechRecognition, {
 import {
   GitHub,
   Settings,
-  Plus,
+  FilePlus,
   Mic,
   Info,
   Activity,
@@ -32,6 +32,10 @@ interface Message {
   text: string;
 }
 
+const initialMessages: Message[] = [
+  { type: 'response', text: 'Try speaking to the microphone.' },
+];
+
 function App() {
   const {
     browserSupportsSpeechRecognition,
@@ -41,14 +45,9 @@ function App() {
     finalTranscript,
   } = useSpeechRecognition();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    { type: 'prompt', text: 'Where is the Empire State Building?' },
-    {
-      type: 'response',
-      text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed sit amet elementum quam. Mauris sit amet tincidunt lacus. Quisque nec commodo ante. Duis ullamcorper suscipit lacus, a feugiat mauris. Integer rhoncus erat consequat nisi cursus porttitor.',
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [areSettingsOpen, setAreSettingsOpen] = useState(false);
+  const abortRef = useRef<AbortController | null>(null);
   const conversationRef = useRef({ id: '', currentMessageId: '' });
   const bottomDivRef = useRef<HTMLDivElement>(null);
 
@@ -66,6 +65,16 @@ function App() {
     const utterance = new SpeechSynthesisUtterance(text);
     window.speechSynthesis.speak(utterance);
   }, []);
+
+  const resetConversation = () => {
+    setIsProcessing(false);
+    setMessages(initialMessages);
+    conversationRef.current = { id: '', currentMessageId: '' };
+
+    window.speechSynthesis.cancel();
+    SpeechRecognition.abortListening();
+    abortRef.current?.abort();
+  };
 
   // Scroll to bottom when user is speaking a prompt
   useEffect(() => {
@@ -85,9 +94,9 @@ function App() {
         ...oldMessages,
         { type: 'prompt', text: finalTranscript },
       ]);
-
       setIsProcessing(true);
 
+      abortRef.current = new AbortController();
       fetch('http://localhost:8000/chatgpt/messages', {
         method: 'POST',
         headers: {
@@ -99,6 +108,7 @@ function App() {
           parentMessageId:
             conversationRef.current.currentMessageId || undefined,
         }),
+        signal: abortRef.current.signal,
       })
         .then((res) => res.json())
         .then((res: CreateChatGPTMessageResponse) => {
@@ -112,7 +122,7 @@ function App() {
         })
         .catch((err: unknown) => {
           console.warn(err);
-          const response = 'Failed to get the response, please try again';
+          const response = 'Failed to get the response, please try again.';
           setMessages((oldMessages) => [
             ...oldMessages,
             { type: 'response', text: response },
@@ -257,8 +267,8 @@ function App() {
             )}
           </button>
 
-          <Button aria-label="New conversation">
-            <Plus strokeWidth={1} />
+          <Button aria-label="New conversation" onClick={resetConversation}>
+            <FilePlus strokeWidth={1} />
           </Button>
         </div>
       </div>
