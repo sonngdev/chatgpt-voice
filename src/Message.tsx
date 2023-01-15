@@ -1,3 +1,4 @@
+import { KeyboardEventHandler } from 'react';
 import { DollarSign, Terminal } from 'react-feather';
 
 interface MessageProps {
@@ -19,6 +20,12 @@ export default function Message({
     }
   };
 
+  const handleKeyDown: KeyboardEventHandler<HTMLDivElement> = (e) => {
+    if (e.key === 'Enter' && onClick) {
+      onClick(text);
+    }
+  };
+
   return (
     <div
       className={`${
@@ -27,7 +34,7 @@ export default function Message({
       role="button"
       tabIndex={0}
       onClick={handleClick}
-      onKeyDown={handleClick}
+      onKeyDown={handleKeyDown}
     >
       <div className="shrink-0 mt-1">
         {type === 'prompt' ? (
