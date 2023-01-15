@@ -45,10 +45,14 @@ const savedData = Storage.load();
 const defaultSettings = {
   host: 'http://localhost',
   port: 8000,
+  voiceIndex: 0,
+  voiceSpeed: 1,
 };
 const initialSettings = {
   host: (savedData?.host as string) || defaultSettings.host,
   port: (savedData?.port as number) || defaultSettings.port,
+  voiceIndex: (savedData?.voiceIndex as number) || defaultSettings.voiceIndex,
+  voiceSpeed: (savedData?.voiceSpeed as number) || defaultSettings.voiceSpeed,
 };
 
 function App() {
@@ -65,8 +69,6 @@ function App() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isTooltipVisible, setIsTooltipVisible] = useState(true);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
-  const [selectedVoiceIndex, setSelectedVoiceIndex] = useState(0);
-  const [voiceSpeed, setVoiceSpeed] = useState(1);
   const abortRef = useRef<AbortController | null>(null);
   const conversationRef = useRef({ id: '', currentMessageId: '' });
   const bottomDivRef = useRef<HTMLDivElement>(null);
@@ -90,11 +92,11 @@ function App() {
     (text: string) => {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.voice = availableVoices[selectedVoiceIndex];
-      utterance.rate = voiceSpeed;
+      utterance.voice = availableVoices[settings.voiceIndex];
+      utterance.rate = settings.voiceSpeed;
       window.speechSynthesis.speak(utterance);
     },
-    [availableVoices, selectedVoiceIndex, voiceSpeed],
+    [availableVoices, settings],
   );
 
   const resetConversation = () => {
@@ -128,7 +130,10 @@ function App() {
         0,
       ); // Fallback to 0 if findIndex returns -1
       setVoices(newVoices);
-      setSelectedVoiceIndex(defaultVoiceIndex);
+      setSettings((oldSettings) => ({
+        ...oldSettings,
+        voiceIndex: defaultVoiceIndex,
+      }));
     });
   }, []);
 
@@ -442,9 +447,12 @@ function App() {
                     <fieldset className="flex flex-col mt-2">
                       <label htmlFor="voice-name">Voice name</label>
                       <Select.Root
-                        value={String(selectedVoiceIndex)}
+                        value={String(settings.voiceIndex)}
                         onValueChange={(value) =>
-                          setSelectedVoiceIndex(Number(value))
+                          setSettings({
+                            ...settings,
+                            voiceIndex: Number(value),
+                          })
                         }
                       >
                         <Select.Trigger
@@ -492,9 +500,9 @@ function App() {
                         <Slider.Root
                           id="voice-speed"
                           className="relative flex items-center select-none touch-none w-48 h-5"
-                          value={[voiceSpeed]}
+                          value={[settings.voiceSpeed]}
                           onValueChange={([newSpeed]) =>
-                            setVoiceSpeed(newSpeed)
+                            setSettings({ ...settings, voiceSpeed: newSpeed })
                           }
                           max={2}
                           min={0.5}
@@ -506,7 +514,7 @@ function App() {
                           </Slider.Track>
                           <Slider.Thumb className="block w-5 h-5 bg-light border border-dark rounded-full" />
                         </Slider.Root>
-                        <div>{`${voiceSpeed}x`}</div>
+                        <div>{`${settings.voiceSpeed}x`}</div>
                       </div>
                     </fieldset>
                   </div>
