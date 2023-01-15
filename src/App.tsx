@@ -11,18 +11,20 @@ import {
   Loader,
   AlertTriangle,
   X,
+  ChevronDown,
+  ChevronUp,
+  Check,
 } from 'react-feather';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Slider from '@radix-ui/react-slider';
+import * as Select from '@radix-ui/react-select';
 import { isDesktop, isMobile } from 'react-device-detect';
 
 import Button from './design_system/Button';
 import SyntaxHighlighter from './design_system/SyntaxHighlighter';
 import Message from './Message';
 import * as Storage from './storage';
-
-import './styles.css';
 
 interface CreateChatGPTMessageResponse {
   answer: string;
@@ -400,7 +402,7 @@ function App() {
                         className="border border-dark rounded-md bg-transparent px-3 py-2"
                       />
                     </fieldset>
-                    <fieldset className="flex flex-col mt-4">
+                    <fieldset className="flex flex-col mt-2">
                       <label htmlFor="port">Port</label>
                       <input
                         id="port"
@@ -419,14 +421,14 @@ function App() {
                       />
                     </fieldset>
 
-                    <small className="block mt-4">
+                    <small className="block mt-2">
                       This app will find the server at{' '}
                       {`${settings.host}:${settings.port}`}
                     </small>
 
                     <Button
                       type="reset"
-                      className="mt-4 text-red-700 border-red-700"
+                      className="mt-2 text-red-700 border-red-700"
                       iconOnly={false}
                       onClick={() => setSettings(defaultSettings)}
                     >
@@ -435,42 +437,77 @@ function App() {
                   </div>
 
                   <div>
-                    <h3 className="text-lg font-medium mt-5">Voice</h3>
+                    <h3 className="text-lg font-medium mt-4">Voice</h3>
 
                     <fieldset className="flex flex-col mt-2">
                       <label htmlFor="voice-name">Voice name</label>
-                      <select
-                        id="voice-name"
-                        value={selectedVoiceIndex}
-                        onChange={(e) =>
-                          setSelectedVoiceIndex(Number(e.target.value))
+                      <Select.Root
+                        value={String(selectedVoiceIndex)}
+                        onValueChange={(value) =>
+                          setSelectedVoiceIndex(Number(value))
                         }
                       >
-                        {availableVoices.map((voice, index) => (
-                          <option key={voice.voiceURI} value={index}>
-                            {voice.name}
-                          </option>
-                        ))}
-                      </select>
+                        <Select.Trigger
+                          id="voice-name"
+                          className="inline-flex items-center justify-between border border-dark rounded-md px-2 py-2 text-sm gap-1 bg-transparent"
+                          aria-label="Voice name"
+                        >
+                          <Select.Value />
+                          <Select.Icon>
+                            <ChevronDown strokeWidth={1} />
+                          </Select.Icon>
+                        </Select.Trigger>
+                        <Select.Portal>
+                          <Select.Content className="overflow-hidden bg-light rounded-md border border-dark">
+                            <Select.ScrollUpButton className="flex items-center justify-center h-6 bg-light cursor-default">
+                              <ChevronUp strokeWidth={1} />
+                            </Select.ScrollUpButton>
+                            <Select.Viewport className="p-2">
+                              {availableVoices.map((voice, index) => (
+                                <Select.Item
+                                  key={voice.voiceURI}
+                                  className="text-sm rounded flex items-center h-6 py-0 pl-6 pr-9 relative select-none data-[highlighted]:outline-none data-[highlighted]:bg-dark data-[highlighted]:text-light data-[disabled]:text-dark/50 data-[disabled]:pointer-events-none"
+                                  value={String(index)}
+                                >
+                                  <Select.ItemText>
+                                    {voice.name}
+                                  </Select.ItemText>
+                                  <Select.ItemIndicator className="absolute left-0 w-6 inline-flex items-center justify-center">
+                                    <Check strokeWidth={1} />
+                                  </Select.ItemIndicator>
+                                </Select.Item>
+                              ))}
+                            </Select.Viewport>
+                            <Select.ScrollDownButton className="flex items-center justify-center h-6 bg-light cursor-default">
+                              <ChevronDown strokeWidth={1} />
+                            </Select.ScrollDownButton>
+                          </Select.Content>
+                        </Select.Portal>
+                      </Select.Root>
                     </fieldset>
+
                     <fieldset className="flex flex-col mt-2">
                       <label htmlFor="voice-speed">Speed</label>
-                      <Slider.Root
-                        id="voice-speed"
-                        className="SliderRoot"
-                        value={[voiceSpeed]}
-                        onValueChange={([newSpeed]) => setVoiceSpeed(newSpeed)}
-                        max={2}
-                        min={0.5}
-                        step={0.25}
-                        aria-label="Voice speed"
-                      >
-                        <Slider.Track className="SliderTrack">
-                          <Slider.Range className="SliderRange" />
-                        </Slider.Track>
-                        <Slider.Thumb className="SliderThumb" />
-                      </Slider.Root>
-                      <div>{voiceSpeed}</div>
+                      <div className="flex gap-x-4">
+                        <Slider.Root
+                          id="voice-speed"
+                          className="relative flex items-center select-none touch-none w-48 h-5"
+                          value={[voiceSpeed]}
+                          onValueChange={([newSpeed]) =>
+                            setVoiceSpeed(newSpeed)
+                          }
+                          max={2}
+                          min={0.5}
+                          step={0.25}
+                          aria-label="Voice speed"
+                        >
+                          <Slider.Track className="bg-dark relative flex-1 rounded-full h-1">
+                            <Slider.Range className="absolute bg-dark rounded-full h-full" />
+                          </Slider.Track>
+                          <Slider.Thumb className="block w-5 h-5 bg-light border border-dark rounded-full" />
+                        </Slider.Root>
+                        <div>{`${voiceSpeed}x`}</div>
+                      </div>
                     </fieldset>
                   </div>
                 </div>
