@@ -14,12 +14,15 @@ import {
 } from 'react-feather';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import * as Dialog from '@radix-ui/react-dialog';
+import * as Slider from '@radix-ui/react-slider';
 import { isDesktop, isMobile } from 'react-device-detect';
 
 import Button from './design_system/Button';
 import SyntaxHighlighter from './design_system/SyntaxHighlighter';
 import Message from './Message';
 import * as Storage from './storage';
+
+import './styles.css';
 
 interface CreateChatGPTMessageResponse {
   answer: string;
@@ -61,6 +64,7 @@ function App() {
   const [isTooltipVisible, setIsTooltipVisible] = useState(true);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [selectedVoiceIndex, setSelectedVoiceIndex] = useState(0);
+  const [voiceSpeed, setVoiceSpeed] = useState(1);
   const abortRef = useRef<AbortController | null>(null);
   const conversationRef = useRef({ id: '', currentMessageId: '' });
   const bottomDivRef = useRef<HTMLDivElement>(null);
@@ -85,10 +89,10 @@ function App() {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.voice = availableVoices[selectedVoiceIndex];
-      console.log(availableVoices[selectedVoiceIndex]);
+      utterance.rate = voiceSpeed;
       window.speechSynthesis.speak(utterance);
     },
-    [availableVoices, selectedVoiceIndex],
+    [availableVoices, selectedVoiceIndex, voiceSpeed],
   );
 
   const resetConversation = () => {
@@ -434,8 +438,9 @@ function App() {
                     <h3 className="text-lg font-medium mt-5">Voice</h3>
 
                     <fieldset className="flex flex-col mt-2">
-                      <label htmlFor="host">Voice</label>
+                      <label htmlFor="voice-name">Voice name</label>
                       <select
+                        id="voice-name"
                         value={selectedVoiceIndex}
                         onChange={(e) =>
                           setSelectedVoiceIndex(Number(e.target.value))
@@ -447,6 +452,25 @@ function App() {
                           </option>
                         ))}
                       </select>
+                    </fieldset>
+                    <fieldset className="flex flex-col mt-2">
+                      <label htmlFor="voice-speed">Speed</label>
+                      <Slider.Root
+                        id="voice-speed"
+                        className="SliderRoot"
+                        value={[voiceSpeed]}
+                        onValueChange={([newSpeed]) => setVoiceSpeed(newSpeed)}
+                        max={2}
+                        min={0.5}
+                        step={0.25}
+                        aria-label="Voice speed"
+                      >
+                        <Slider.Track className="SliderTrack">
+                          <Slider.Range className="SliderRange" />
+                        </Slider.Track>
+                        <Slider.Thumb className="SliderThumb" />
+                      </Slider.Root>
+                      <div>{voiceSpeed}</div>
                     </fieldset>
                   </div>
                 </div>
