@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import SpeechRecognition, {
   useSpeechRecognition,
 } from 'react-speech-recognition';
@@ -59,9 +59,17 @@ function App() {
   const [settings, setSettings] = useState(initialSettings);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isTooltipVisible, setIsTooltipVisible] = useState(true);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const [selectedVoiceIndex, setSelectedVoiceIndex] = useState(0);
   const abortRef = useRef<AbortController | null>(null);
   const conversationRef = useRef({ id: '', currentMessageId: '' });
   const bottomDivRef = useRef<HTMLDivElement>(null);
+
+  const availableVoices = useMemo(() => {
+    return voices.filter(
+      (voice) => voice.localService && voice.lang.startsWith('en-'),
+    );
+  }, [voices]);
 
   const recognizeSpeech = () => {
     if (isListening) {
@@ -72,11 +80,16 @@ function App() {
     }
   };
 
-  const speak = useCallback((text: string) => {
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    window.speechSynthesis.speak(utterance);
-  }, []);
+  const speak = useCallback(
+    (text: string) => {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.voice = availableVoices[selectedVoiceIndex];
+      console.log(availableVoices[selectedVoiceIndex]);
+      window.speechSynthesis.speak(utterance);
+    },
+    [availableVoices, selectedVoiceIndex],
+  );
 
   const resetConversation = () => {
     setIsProcessing(false);
@@ -99,6 +112,19 @@ function App() {
   useEffect(() => {
     bottomDivRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages.length]);
+
+  // Display voices when they become available
+  useEffect(() => {
+    window.speechSynthesis.addEventListener('voiceschanged', () => {
+      const newVoices = window.speechSynthesis.getVoices();
+      const defaultVoiceIndex = Math.max(
+        newVoices.findIndex((voice) => voice.default),
+        0,
+      ); // Fallback to 0 if findIndex returns -1
+      setVoices(newVoices);
+      setSelectedVoiceIndex(defaultVoiceIndex);
+    });
+  }, []);
 
   useEffect(() => {
     if (finalTranscript) {
@@ -353,54 +379,76 @@ function App() {
 
               {isDesktop && (
                 <div className="lg:w-full">
-                  <h3 className="text-lg font-medium mt-3">Settings</h3>
+                  <div>
+                    <h3 className="text-lg font-medium mt-3">Server</h3>
 
-                  <fieldset className="flex flex-col mt-2">
-                    <label htmlFor="host">Host</label>
-                    <input
-                      id="host"
-                      value={settings.host}
-                      onChange={(e) =>
-                        setSettings({ ...settings, host: e.target.value })
-                      }
-                      onBlur={() => {
-                        Storage.save(settings);
-                      }}
-                      className="border border-dark rounded-md bg-transparent px-3 py-2"
-                    />
-                  </fieldset>
-                  <fieldset className="flex flex-col mt-4">
-                    <label htmlFor="port">Port</label>
-                    <input
-                      id="port"
-                      type="number"
-                      value={settings.port}
-                      onChange={(e) =>
-                        setSettings({
-                          ...settings,
-                          port: Number(e.target.value),
-                        })
-                      }
-                      onBlur={() => {
-                        Storage.save(settings);
-                      }}
-                      className="border border-dark rounded-md bg-transparent px-3 py-2"
-                    />
-                  </fieldset>
+                    <fieldset className="flex flex-col mt-2">
+                      <label htmlFor="host">Host</label>
+                      <input
+                        id="host"
+                        value={settings.host}
+                        onChange={(e) =>
+                          setSettings({ ...settings, host: e.target.value })
+                        }
+                        onBlur={() => {
+                          Storage.save(settings);
+                        }}
+                        className="border border-dark rounded-md bg-transparent px-3 py-2"
+                      />
+                    </fieldset>
+                    <fieldset className="flex flex-col mt-4">
+                      <label htmlFor="port">Port</label>
+                      <input
+                        id="port"
+                        type="number"
+                        value={settings.port}
+                        onChange={(e) =>
+                          setSettings({
+                            ...settings,
+                            port: Number(e.target.value),
+                          })
+                        }
+                        onBlur={() => {
+                          Storage.save(settings);
+                        }}
+                        className="border border-dark rounded-md bg-transparent px-3 py-2"
+                      />
+                    </fieldset>
 
-                  <small className="block mt-4">
-                    This app will find the server at{' '}
-                    {`${settings.host}:${settings.port}`}
-                  </small>
+                    <small className="block mt-4">
+                      This app will find the server at{' '}
+                      {`${settings.host}:${settings.port}`}
+                    </small>
 
-                  <Button
-                    type="reset"
-                    className="mt-4 text-red-700 border-red-700"
-                    iconOnly={false}
-                    onClick={() => setSettings(defaultSettings)}
-                  >
-                    Reset to defaults
-                  </Button>
+                    <Button
+                      type="reset"
+                      className="mt-4 text-red-700 border-red-700"
+                      iconOnly={false}
+                      onClick={() => setSettings(defaultSettings)}
+                    >
+                      Reset to defaults
+                    </Button>
+                  </div>
+
+                  <div>
+                    <h3 className="text-lg font-medium mt-5">Voice</h3>
+
+                    <fieldset className="flex flex-col mt-2">
+                      <label htmlFor="host">Voice</label>
+                      <select
+                        value={selectedVoiceIndex}
+                        onChange={(e) =>
+                          setSelectedVoiceIndex(Number(e.target.value))
+                        }
+                      >
+                        {availableVoices.map((voice, index) => (
+                          <option key={voice.voiceURI} value={index}>
+                            {voice.name}
+                          </option>
+                        ))}
+                      </select>
+                    </fieldset>
+                  </div>
                 </div>
               )}
             </main>
