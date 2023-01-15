@@ -109,6 +109,11 @@ function App() {
     abortRef.current?.abort();
   };
 
+  const handleModalOpenChange = (isOpen: boolean) => {
+    setIsModalVisible(isOpen);
+    Storage.save(settings);
+  };
+
   // Scroll to bottom when user is speaking a prompt
   useEffect(() => {
     if (isListening) {
@@ -130,10 +135,15 @@ function App() {
         0,
       ); // Fallback to 0 if findIndex returns -1
       setVoices(newVoices);
-      setSettings((oldSettings) => ({
-        ...oldSettings,
-        voiceIndex: defaultVoiceIndex,
-      }));
+      setSettings((oldSettings) => {
+        if (oldSettings.voiceIndex > 0) {
+          return oldSettings;
+        }
+        return {
+          ...oldSettings,
+          voiceIndex: defaultVoiceIndex,
+        };
+      });
     });
   }, []);
 
@@ -340,7 +350,7 @@ function App() {
       </div>
 
       {/* Settings modal */}
-      <Dialog.Root open={isModalVisible} onOpenChange={setIsModalVisible}>
+      <Dialog.Root open={isModalVisible} onOpenChange={handleModalOpenChange}>
         <Dialog.Portal>
           <Dialog.Overlay className="bg-dark/75 fixed inset-0 animate-fade-in" />
           <Dialog.Content className="bg-light border border-dark rounded-lg shadow-solid fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5/6 max-w-md max-h-screen p-6 animate-rise-up focus:outline-none overflow-y-auto lg:max-w-5xl">
@@ -398,11 +408,8 @@ function App() {
                       <input
                         id="host"
                         value={settings.host}
-                        onChange={(e) =>
-                          setSettings({ ...settings, host: e.target.value })
-                        }
-                        onBlur={() => {
-                          Storage.save(settings);
+                        onChange={(e) => {
+                          setSettings({ ...settings, host: e.target.value });
                         }}
                         className="border border-dark rounded-md bg-transparent px-3 py-2"
                       />
@@ -413,14 +420,11 @@ function App() {
                         id="port"
                         type="number"
                         value={settings.port}
-                        onChange={(e) =>
+                        onChange={(e) => {
                           setSettings({
                             ...settings,
                             port: Number(e.target.value),
-                          })
-                        }
-                        onBlur={() => {
-                          Storage.save(settings);
+                          });
                         }}
                         className="border border-dark rounded-md bg-transparent px-3 py-2"
                       />
@@ -448,12 +452,12 @@ function App() {
                       <label htmlFor="voice-name">Voice name</label>
                       <Select.Root
                         value={String(settings.voiceIndex)}
-                        onValueChange={(value) =>
+                        onValueChange={(value) => {
                           setSettings({
                             ...settings,
                             voiceIndex: Number(value),
-                          })
-                        }
+                          });
+                        }}
                       >
                         <Select.Trigger
                           id="voice-name"
@@ -501,9 +505,9 @@ function App() {
                           id="voice-speed"
                           className="relative flex items-center select-none touch-none w-48 h-5"
                           value={[settings.voiceSpeed]}
-                          onValueChange={([newSpeed]) =>
-                            setSettings({ ...settings, voiceSpeed: newSpeed })
-                          }
+                          onValueChange={([newSpeed]) => {
+                            setSettings({ ...settings, voiceSpeed: newSpeed });
+                          }}
                           max={2}
                           min={0.5}
                           step={0.25}
