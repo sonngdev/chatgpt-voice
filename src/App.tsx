@@ -39,23 +39,11 @@ interface Message {
   text: string;
 }
 
-const initialMessages: Message[] = [
-  { type: 'response', text: 'Try speaking to the microphone.' },
-];
+interface VoiceMappings {
+  [group: string]: SpeechSynthesisVoice[];
+}
 
 const savedData = Storage.load();
-const defaultSettings = {
-  host: 'http://localhost',
-  port: 8000,
-  voiceIndex: 0,
-  voiceSpeed: 1,
-};
-const initialSettings = {
-  host: (savedData?.host as string) || defaultSettings.host,
-  port: (savedData?.port as number) || defaultSettings.port,
-  voiceIndex: (savedData?.voiceIndex as number) || defaultSettings.voiceIndex,
-  voiceSpeed: (savedData?.voiceSpeed as number) || defaultSettings.voiceSpeed,
-};
 
 function App() {
   const {
@@ -65,9 +53,27 @@ function App() {
     listening: isListening,
     finalTranscript,
   } = useSpeechRecognition();
+
+  const initialMessages: Message[] = [
+    { type: 'response', text: 'Try speaking to the microphone.' },
+  ];
+  const defaultSettingsRef = useRef({
+    host: 'http://localhost',
+    port: 8000,
+    voiceURI: '',
+    voiceSpeed: 1,
+  });
   const [isProcessing, setIsProcessing] = useState(false);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
-  const [settings, setSettings] = useState(initialSettings);
+  const [settings, setSettings] = useState({
+    host: (savedData?.host as string) ?? defaultSettingsRef.current.host,
+    port: (savedData?.port as number) ?? defaultSettingsRef.current.port,
+    voiceURI:
+      (savedData?.voiceURI as string) ?? defaultSettingsRef.current.voiceURI,
+    voiceSpeed:
+      (savedData?.voiceSpeed as number) ??
+      defaultSettingsRef.current.voiceSpeed,
+  });
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isTooltipVisible, setIsTooltipVisible] = useState(true);
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
@@ -76,10 +82,36 @@ function App() {
   const bottomDivRef = useRef<HTMLDivElement>(null);
 
   const availableVoices = useMemo(() => {
-    return voices.filter(
+    const englishTypes = new Map();
+    englishTypes.set('en-AU', 'English (Australia)');
+    englishTypes.set('en-CA', 'English (Canada)');
+    englishTypes.set('en-GB', 'English (United Kingdom)');
+    englishTypes.set('en-IE', 'English (Ireland)');
+    englishTypes.set('en-IN', 'English (India)');
+    englishTypes.set('en-NZ', 'English (New Zealand)');
+    englishTypes.set('en-US', 'English (United State)');
+
+    const localEnglishVoices = voices.filter(
       (voice) => voice.localService && voice.lang.startsWith('en-'),
     );
+
+    const result: VoiceMappings = {};
+    for (let voice of localEnglishVoices) {
+      const label = englishTypes.get(voice.lang);
+      if (typeof label !== 'string') {
+        continue;
+      }
+      if (!result[label]) {
+        result[label] = [];
+      }
+      result[label].push(voice);
+    }
+    return result;
   }, [voices]);
+
+  const selectedVoice = useMemo(() => {
+    return voices.find((voice) => voice.voiceURI === settings.voiceURI);
+  }, [voices, settings.voiceURI]);
 
   const recognizeSpeech = () => {
     if (isListening) {
@@ -94,11 +126,13 @@ function App() {
     (text: string) => {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.voice = availableVoices[settings.voiceIndex];
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
       utterance.rate = settings.voiceSpeed;
       window.speechSynthesis.speak(utterance);
     },
-    [availableVoices, settings],
+    [selectedVoice, settings.voiceSpeed],
   );
 
   const resetConversation = () => {
@@ -117,7 +151,10 @@ function App() {
   };
 
   const resetSetting = (setting: keyof typeof settings) => {
-    setSettings({ ...settings, [setting]: defaultSettings[setting] });
+    setSettings({
+      ...settings,
+      [setting]: defaultSettingsRef.current[setting],
+    });
   };
 
   // Scroll to bottom when user is speaking a prompt
@@ -136,20 +173,20 @@ function App() {
   useEffect(() => {
     window.speechSynthesis.addEventListener('voiceschanged', () => {
       const newVoices = window.speechSynthesis.getVoices();
-      const defaultVoiceIndex = Math.max(
-        newVoices.findIndex((voice) => voice.default),
-        0,
-      ); // Fallback to 0 if findIndex returns -1
+      const defaultVoice = newVoices.find((voice) => voice.default);
       setVoices(newVoices);
       setSettings((oldSettings) => {
-        if (oldSettings.voiceIndex > 0) {
+        if (!defaultVoice || oldSettings.voiceURI) {
           return oldSettings;
         }
         return {
           ...oldSettings,
-          voiceIndex: defaultVoiceIndex,
+          voiceURI: defaultVoice.voiceURI,
         };
       });
+      if (defaultVoice) {
+        defaultSettingsRef.current.voiceURI = defaultVoice.voiceURI;
+      }
     });
   }, []);
 
@@ -468,11 +505,11 @@ function App() {
                       <label htmlFor="voice-name">Voice name</label>
                       <div className="flex">
                         <Select.Root
-                          value={String(settings.voiceIndex)}
+                          value={settings.voiceURI}
                           onValueChange={(value) => {
                             setSettings({
                               ...settings,
-                              voiceIndex: Number(value),
+                              voiceURI: value,
                             });
                           }}
                         >
@@ -492,20 +529,35 @@ function App() {
                                 <ChevronUp strokeWidth={1} />
                               </Select.ScrollUpButton>
                               <Select.Viewport className="p-2">
-                                {availableVoices.map((voice, index) => (
-                                  <Select.Item
-                                    key={voice.voiceURI}
-                                    className="text-sm rounded flex items-center h-6 py-0 pl-6 pr-9 relative select-none data-[highlighted]:outline-none data-[highlighted]:bg-dark data-[highlighted]:text-light data-[disabled]:text-dark/50 data-[disabled]:pointer-events-none"
-                                    value={String(index)}
-                                  >
-                                    <Select.ItemText>
-                                      {voice.name}
-                                    </Select.ItemText>
-                                    <Select.ItemIndicator className="absolute left-0 w-6 inline-flex items-center justify-center">
-                                      <Check strokeWidth={1} />
-                                    </Select.ItemIndicator>
-                                  </Select.Item>
-                                ))}
+                                {Object.entries(availableVoices).map(
+                                  ([group, voicesInGroup], index) => (
+                                    <>
+                                      {index > 0 && (
+                                        <Select.Separator className="h-px bg-dark m-1" />
+                                      )}
+
+                                      <Select.Group>
+                                        <Select.Label className="px-6 py-0 text-xs text-dark/50">
+                                          {group}
+                                        </Select.Label>
+                                        {voicesInGroup.map((voice) => (
+                                          <Select.Item
+                                            key={voice.voiceURI}
+                                            className="text-sm rounded flex items-center h-6 py-0 pl-6 pr-9 relative select-none data-[highlighted]:outline-none data-[highlighted]:bg-dark data-[highlighted]:text-light data-[disabled]:text-dark/50 data-[disabled]:pointer-events-none"
+                                            value={voice.voiceURI}
+                                          >
+                                            <Select.ItemText>
+                                              {voice.name}
+                                            </Select.ItemText>
+                                            <Select.ItemIndicator className="absolute left-0 w-6 inline-flex items-center justify-center">
+                                              <Check strokeWidth={1} />
+                                            </Select.ItemIndicator>
+                                          </Select.Item>
+                                        ))}
+                                      </Select.Group>
+                                    </>
+                                  ),
+                                )}
                               </Select.Viewport>
                               <Select.ScrollDownButton className="flex items-center justify-center h-6 bg-light cursor-default">
                                 <ChevronDown strokeWidth={1} />
@@ -516,7 +568,7 @@ function App() {
                         <Button
                           iconOnly={false}
                           className="rounded-l-none"
-                          onClick={() => resetSetting('voiceIndex')}
+                          onClick={() => resetSetting('voiceURI')}
                         >
                           Reset
                         </Button>
