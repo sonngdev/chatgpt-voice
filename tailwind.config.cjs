@@ -1,4 +1,6 @@
 /** @type {import('tailwindcss').Config} */
+const colors = require('tailwindcss/colors');
+
 module.exports = {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
@@ -12,6 +14,7 @@ module.exports = {
         dark: '#191308',
         accent1: '#028090',
         accent2: '#C64191',
+        danger: colors.red[700],
       },
       boxShadow: {
         solid: '3px 3px 0 #191308',

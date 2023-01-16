@@ -114,6 +114,10 @@ function App() {
     Storage.save(settings);
   };
 
+  const resetSetting = (setting: keyof typeof settings) => {
+    setSettings({ ...settings, [setting]: defaultSettings[setting] });
+  };
+
   // Scroll to bottom when user is speaking a prompt
   useEffect(() => {
     if (isListening) {
@@ -259,7 +263,7 @@ function App() {
       <div>
         <div className="lg:absolute lg:right-28 lg:bottom-12 lg:w-72">
           {!isMicrophoneAvailable && (
-            <div className="flex gap-x-3 mb-6 text-red-700">
+            <div className="flex gap-x-3 mb-6 text-danger">
               <div className="shrink-0">
                 <AlertTriangle strokeWidth={1} />
               </div>
@@ -405,44 +409,53 @@ function App() {
 
                     <fieldset className="flex flex-col mt-2">
                       <label htmlFor="host">Host</label>
-                      <input
-                        id="host"
-                        value={settings.host}
-                        onChange={(e) => {
-                          setSettings({ ...settings, host: e.target.value });
-                        }}
-                        className="border border-dark rounded-md bg-transparent px-3 py-2"
-                      />
+                      <div className="flex">
+                        <input
+                          id="host"
+                          value={settings.host}
+                          onChange={(e) => {
+                            setSettings({ ...settings, host: e.target.value });
+                          }}
+                          className="border border-dark border-r-0 rounded-l-md bg-transparent px-3 py-2 flex-1"
+                        />
+                        <Button
+                          iconOnly={false}
+                          className="rounded-l-none"
+                          onClick={() => resetSetting('host')}
+                        >
+                          Reset
+                        </Button>
+                      </div>
                     </fieldset>
                     <fieldset className="flex flex-col mt-2">
                       <label htmlFor="port">Port</label>
-                      <input
-                        id="port"
-                        type="number"
-                        value={settings.port}
-                        onChange={(e) => {
-                          setSettings({
-                            ...settings,
-                            port: Number(e.target.value),
-                          });
-                        }}
-                        className="border border-dark rounded-md bg-transparent px-3 py-2"
-                      />
+                      <div className="flex">
+                        <input
+                          id="port"
+                          type="number"
+                          value={settings.port}
+                          onChange={(e) => {
+                            setSettings({
+                              ...settings,
+                              port: Number(e.target.value),
+                            });
+                          }}
+                          className="border border-dark border-r-0 rounded-l-md bg-transparent px-3 py-2 flex-1"
+                        />
+                        <Button
+                          iconOnly={false}
+                          className="rounded-l-none"
+                          onClick={() => resetSetting('port')}
+                        >
+                          Reset
+                        </Button>
+                      </div>
                     </fieldset>
 
                     <small className="block mt-2">
                       This app will find the server at{' '}
                       {`${settings.host}:${settings.port}`}
                     </small>
-
-                    <Button
-                      type="reset"
-                      className="mt-2 text-red-700 border-red-700"
-                      iconOnly={false}
-                      onClick={() => setSettings(defaultSettings)}
-                    >
-                      Reset to defaults
-                    </Button>
                   </div>
 
                   <div>
@@ -450,60 +463,69 @@ function App() {
 
                     <fieldset className="flex flex-col mt-2">
                       <label htmlFor="voice-name">Voice name</label>
-                      <Select.Root
-                        value={String(settings.voiceIndex)}
-                        onValueChange={(value) => {
-                          setSettings({
-                            ...settings,
-                            voiceIndex: Number(value),
-                          });
-                        }}
-                      >
-                        <Select.Trigger
-                          id="voice-name"
-                          className="inline-flex items-center justify-between border border-dark rounded-md px-2 py-2 text-sm gap-1 bg-transparent"
-                          aria-label="Voice name"
+                      <div className="flex">
+                        <Select.Root
+                          value={String(settings.voiceIndex)}
+                          onValueChange={(value) => {
+                            setSettings({
+                              ...settings,
+                              voiceIndex: Number(value),
+                            });
+                          }}
                         >
-                          <Select.Value />
-                          <Select.Icon>
-                            <ChevronDown strokeWidth={1} />
-                          </Select.Icon>
-                        </Select.Trigger>
-                        <Select.Portal>
-                          <Select.Content className="overflow-hidden bg-light rounded-md border border-dark">
-                            <Select.ScrollUpButton className="flex items-center justify-center h-6 bg-light cursor-default">
-                              <ChevronUp strokeWidth={1} />
-                            </Select.ScrollUpButton>
-                            <Select.Viewport className="p-2">
-                              {availableVoices.map((voice, index) => (
-                                <Select.Item
-                                  key={voice.voiceURI}
-                                  className="text-sm rounded flex items-center h-6 py-0 pl-6 pr-9 relative select-none data-[highlighted]:outline-none data-[highlighted]:bg-dark data-[highlighted]:text-light data-[disabled]:text-dark/50 data-[disabled]:pointer-events-none"
-                                  value={String(index)}
-                                >
-                                  <Select.ItemText>
-                                    {voice.name}
-                                  </Select.ItemText>
-                                  <Select.ItemIndicator className="absolute left-0 w-6 inline-flex items-center justify-center">
-                                    <Check strokeWidth={1} />
-                                  </Select.ItemIndicator>
-                                </Select.Item>
-                              ))}
-                            </Select.Viewport>
-                            <Select.ScrollDownButton className="flex items-center justify-center h-6 bg-light cursor-default">
+                          <Select.Trigger
+                            id="voice-name"
+                            className="inline-flex items-center justify-between border border-dark border-r-0 rounded-md rounded-r-none px-2 py-2 text-sm gap-1 bg-transparent flex-1"
+                            aria-label="Voice name"
+                          >
+                            <Select.Value />
+                            <Select.Icon>
                               <ChevronDown strokeWidth={1} />
-                            </Select.ScrollDownButton>
-                          </Select.Content>
-                        </Select.Portal>
-                      </Select.Root>
+                            </Select.Icon>
+                          </Select.Trigger>
+                          <Select.Portal>
+                            <Select.Content className="overflow-hidden bg-light rounded-md border border-dark">
+                              <Select.ScrollUpButton className="flex items-center justify-center h-6 bg-light cursor-default">
+                                <ChevronUp strokeWidth={1} />
+                              </Select.ScrollUpButton>
+                              <Select.Viewport className="p-2">
+                                {availableVoices.map((voice, index) => (
+                                  <Select.Item
+                                    key={voice.voiceURI}
+                                    className="text-sm rounded flex items-center h-6 py-0 pl-6 pr-9 relative select-none data-[highlighted]:outline-none data-[highlighted]:bg-dark data-[highlighted]:text-light data-[disabled]:text-dark/50 data-[disabled]:pointer-events-none"
+                                    value={String(index)}
+                                  >
+                                    <Select.ItemText>
+                                      {voice.name}
+                                    </Select.ItemText>
+                                    <Select.ItemIndicator className="absolute left-0 w-6 inline-flex items-center justify-center">
+                                      <Check strokeWidth={1} />
+                                    </Select.ItemIndicator>
+                                  </Select.Item>
+                                ))}
+                              </Select.Viewport>
+                              <Select.ScrollDownButton className="flex items-center justify-center h-6 bg-light cursor-default">
+                                <ChevronDown strokeWidth={1} />
+                              </Select.ScrollDownButton>
+                            </Select.Content>
+                          </Select.Portal>
+                        </Select.Root>
+                        <Button
+                          iconOnly={false}
+                          className="rounded-l-none"
+                          onClick={() => resetSetting('voiceIndex')}
+                        >
+                          Reset
+                        </Button>
+                      </div>
                     </fieldset>
 
-                    <fieldset className="flex flex-col mt-2">
+                    <fieldset className="flex flex-col mt-4">
                       <label htmlFor="voice-speed">Speed</label>
-                      <div className="flex gap-x-4">
+                      <div className="flex gap-x-4 items-center">
                         <Slider.Root
                           id="voice-speed"
-                          className="relative flex items-center select-none touch-none w-48 h-5"
+                          className="relative flex items-center select-none touch-none w-48 h-5 flex-1"
                           value={[settings.voiceSpeed]}
                           onValueChange={([newSpeed]) => {
                             setSettings({ ...settings, voiceSpeed: newSpeed });
@@ -518,7 +540,15 @@ function App() {
                           </Slider.Track>
                           <Slider.Thumb className="block w-5 h-5 bg-light border border-dark rounded-full" />
                         </Slider.Root>
-                        <div>{`${settings.voiceSpeed}x`}</div>
+                        <div className="text-right">
+                          {`${settings.voiceSpeed.toFixed(2)}x`}
+                        </div>
+                        <Button
+                          iconOnly={false}
+                          onClick={() => resetSetting('voiceSpeed')}
+                        >
+                          Reset
+                        </Button>
                       </div>
                     </fieldset>
                   </div>
