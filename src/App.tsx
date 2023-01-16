@@ -14,6 +14,7 @@ import {
   ChevronDown,
   ChevronUp,
   Check,
+  Headphones,
 } from 'react-feather';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import * as Dialog from '@radix-ui/react-dialog';
@@ -532,7 +533,7 @@ function App() {
                           }}
                           max={2}
                           min={0.5}
-                          step={0.25}
+                          step={0.1}
                           aria-label="Voice speed"
                         >
                           <Slider.Track className="bg-dark relative flex-1 rounded-full h-1">
@@ -552,6 +553,15 @@ function App() {
                       </div>
                     </fieldset>
                   </div>
+
+                  <Button
+                    iconOnly={false}
+                    className="mt-2"
+                    onClick={() => speak('It was a dark and stormy night')}
+                  >
+                    <Headphones strokeWidth={1} />
+                    <span className="ml-1">Try speaking</span>
+                  </Button>
                 </div>
               )}
             </main>
