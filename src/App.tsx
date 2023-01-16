@@ -502,7 +502,7 @@ function App() {
                     <h3 className="text-lg font-medium mt-4">Voice</h3>
 
                     <fieldset className="flex flex-col mt-2">
-                      <label htmlFor="voice-name">Voice name</label>
+                      <label htmlFor="voice-name">Name</label>
                       <div className="flex">
                         <Select.Root
                           value={settings.voiceURI}
