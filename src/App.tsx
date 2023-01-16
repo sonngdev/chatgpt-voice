@@ -15,6 +15,7 @@ import {
   ChevronUp,
   Check,
   Headphones,
+  Info,
 } from 'react-feather';
 import * as Tooltip from '@radix-ui/react-tooltip';
 import * as Dialog from '@radix-ui/react-dialog';
@@ -453,7 +454,8 @@ function App() {
                       </div>
                     </fieldset>
 
-                    <small className="block mt-2">
+                    <small className="mt-2 flex items-center gap-x-1">
+                      <Info strokeWidth={1} size={16} />
                       This app will find the server at{' '}
                       {`${settings.host}:${settings.port}`}
                     </small>
