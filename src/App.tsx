@@ -417,7 +417,7 @@ function App() {
                           onChange={(e) => {
                             setSettings({ ...settings, host: e.target.value });
                           }}
-                          className="border border-dark border-r-0 rounded-l-md bg-transparent px-3 py-2 flex-1"
+                          className="border border-dark border-r-0 rounded-l-md bg-transparent p-2 flex-1"
                         />
                         <Button
                           iconOnly={false}
@@ -441,7 +441,7 @@ function App() {
                               port: Number(e.target.value),
                             });
                           }}
-                          className="border border-dark border-r-0 rounded-l-md bg-transparent px-3 py-2 flex-1"
+                          className="border border-dark border-r-0 rounded-l-md bg-transparent p-2 flex-1"
                         />
                         <Button
                           iconOnly={false}
@@ -476,7 +476,7 @@ function App() {
                         >
                           <Select.Trigger
                             id="voice-name"
-                            className="inline-flex items-center justify-between border border-dark border-r-0 rounded-md rounded-r-none px-2 py-2 text-sm gap-1 bg-transparent flex-1"
+                            className="inline-flex items-center justify-between border border-dark border-r-0 rounded-md rounded-r-none p-2 text-sm gap-1 bg-transparent flex-1"
                             aria-label="Voice name"
                           >
                             <Select.Value />
