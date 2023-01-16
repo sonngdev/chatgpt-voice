@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import SpeechRecognition, {
   useSpeechRecognition,
 } from 'react-speech-recognition';
@@ -531,7 +538,7 @@ function App() {
                               <Select.Viewport className="p-2">
                                 {Object.entries(availableVoices).map(
                                   ([group, voicesInGroup], index) => (
-                                    <>
+                                    <Fragment key={group}>
                                       {index > 0 && (
                                         <Select.Separator className="h-px bg-dark m-1" />
                                       )}
@@ -555,7 +562,7 @@ function App() {
                                           </Select.Item>
                                         ))}
                                       </Select.Group>
-                                    </>
+                                    </Fragment>
                                   ),
                                 )}
                               </Select.Viewport>
