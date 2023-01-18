@@ -178,7 +178,7 @@ function App() {
 
   // Display voices when they become available
   useEffect(() => {
-    window.speechSynthesis.addEventListener('voiceschanged', () => {
+    const updateVoiceSettings = () => {
       const newVoices = window.speechSynthesis.getVoices();
       const defaultVoice = newVoices.find((voice) => voice.default);
       setVoices(newVoices);
@@ -194,7 +194,19 @@ function App() {
       if (defaultVoice) {
         defaultSettingsRef.current.voiceURI = defaultVoice.voiceURI;
       }
-    });
+    };
+
+    window.speechSynthesis.addEventListener(
+      'voiceschanged',
+      updateVoiceSettings,
+    );
+
+    return () => {
+      window.speechSynthesis.removeEventListener(
+        'voiceschanged',
+        updateVoiceSettings,
+      );
+    };
   }, []);
 
   useEffect(() => {
