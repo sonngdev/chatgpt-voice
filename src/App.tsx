@@ -51,6 +51,10 @@ interface VoiceMappings {
   [group: string]: SpeechSynthesisVoice[];
 }
 
+// Disable local server setup instruction because we have a
+// backend server running. This might change in the future.
+const IS_LOCAL_SETUP_REQUIRED = false;
+
 const savedData = Storage.load();
 
 function App() {
@@ -84,7 +88,9 @@ function App() {
       defaultSettingsRef.current.voiceSpeed,
   });
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isTooltipVisible, setIsTooltipVisible] = useState(true);
+  const [isTooltipVisible, setIsTooltipVisible] = useState(
+    IS_LOCAL_SETUP_REQUIRED,
+  );
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const abortRef = useRef<AbortController | null>(null);
   const conversationRef = useRef({ id: '', currentMessageId: '' });
@@ -225,7 +231,10 @@ function App() {
     setIsProcessing(true);
 
     abortRef.current = new AbortController();
-    fetch(`${settings.host}:${settings.port}/chatgpt/messages`, {
+    const endpoint = IS_LOCAL_SETUP_REQUIRED
+      ? `${settings.host}:${settings.port}/chatgpt/messages`
+      : 'https://sonng-chatgpt.uksouth.cloudapp.azure.com';
+    fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -252,7 +261,7 @@ function App() {
         let response: string;
 
         // Connection refused
-        if (err instanceof TypeError) {
+        if (err instanceof TypeError && IS_LOCAL_SETUP_REQUIRED) {
           response =
             'Local server needs to be set up first. Click on the Settings button to see how.';
           setIsTooltipVisible(true);
@@ -420,54 +429,65 @@ function App() {
       <Dialog.Root open={isModalVisible} onOpenChange={handleModalOpenChange}>
         <Dialog.Portal>
           <Dialog.Overlay className="bg-dark/75 fixed inset-0 animate-fade-in" />
-          <Dialog.Content className="bg-light border border-dark rounded-lg shadow-solid fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5/6 max-w-md max-h-screen p-6 animate-rise-up focus:outline-none overflow-y-auto lg:max-w-5xl">
+          <Dialog.Content
+            className={`bg-light border border-dark rounded-lg shadow-solid fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5/6 max-w-md max-h-screen p-6 animate-rise-up focus:outline-none overflow-y-auto ${
+              IS_LOCAL_SETUP_REQUIRED ? 'lg:max-w-5xl' : ''
+            }`}
+          >
             <Dialog.Title className="font-medium text-xl mb-4">
               Settings
             </Dialog.Title>
-            <Dialog.Description>
-              Set up local server on Desktop in 3 easy steps.
-            </Dialog.Description>
+
+            {IS_LOCAL_SETUP_REQUIRED && (
+              <Dialog.Description>
+                Set up local server on Desktop in 3 easy steps.
+              </Dialog.Description>
+            )}
 
             <main className="lg:flex lg:gap-x-12">
-              <div>
-                <h3 className="text-lg font-medium mt-3">Step 1</h3>
-                <p>
-                  Clone <code>chatgpt-server</code> repo.
-                </p>
-                <SyntaxHighlighter language="bash">
-                  git clone https://github.com/thanhsonng/chatgpt-server.git
-                </SyntaxHighlighter>
+              {IS_LOCAL_SETUP_REQUIRED && (
+                <div>
+                  <h3 className="text-lg font-medium mt-3">Step 1</h3>
+                  <p>
+                    Clone <code>chatgpt-server</code> repo.
+                  </p>
+                  <SyntaxHighlighter language="bash">
+                    git clone https://github.com/thanhsonng/chatgpt-server.git
+                  </SyntaxHighlighter>
 
-                <h3 className="text-lg font-medium mt-3">Step 2</h3>
-                <p>
-                  Create <code>.env</code> file in the project's root. You need
-                  an{' '}
-                  <a href="https://openai.com/api/" target="_blank">
-                    OpenAI account
-                  </a>
-                  .
-                </p>
-                <SyntaxHighlighter language="bash">
-                  {[
-                    'PORT=8000 # Or whichever port available',
-                    'OPENAI_EMAIL="<your-openai-email>"',
-                    'OPENAI_PASSWORD="<your-openai-password>"',
-                  ].join('\n')}
-                </SyntaxHighlighter>
+                  <h3 className="text-lg font-medium mt-3">Step 2</h3>
+                  <p>
+                    Create <code>.env</code> file in the project's root. You
+                    need an{' '}
+                    <a href="https://openai.com/api/" target="_blank">
+                      OpenAI account
+                    </a>
+                    .
+                  </p>
+                  <SyntaxHighlighter language="bash">
+                    {[
+                      'PORT=8000 # Or whichever port available',
+                      'OPENAI_EMAIL="<your-openai-email>"',
+                      'OPENAI_PASSWORD="<your-openai-password>"',
+                    ].join('\n')}
+                  </SyntaxHighlighter>
 
-                <h3 className="text-lg font-medium mt-3">Step 3</h3>
-                <p>
-                  Start the server - done! Make sure you are using Node 18 or
-                  higher.
-                </p>
-                <SyntaxHighlighter language="bash">
-                  {['npm install', 'npm run build', 'npm run start'].join('\n')}
-                </SyntaxHighlighter>
-              </div>
+                  <h3 className="text-lg font-medium mt-3">Step 3</h3>
+                  <p>
+                    Start the server - done! Make sure you are using Node 18 or
+                    higher.
+                  </p>
+                  <SyntaxHighlighter language="bash">
+                    {['npm install', 'npm run build', 'npm run start'].join(
+                      '\n',
+                    )}
+                  </SyntaxHighlighter>
+                </div>
+              )}
 
-              {isDesktop && (
-                <div className="lg:w-full">
-                  <div>
+              <div className="lg:w-full">
+                {IS_LOCAL_SETUP_REQUIRED && isDesktop && (
+                  <div className="mb-4">
                     <h3 className="text-lg font-medium mt-3">Server</h3>
 
                     <fieldset className="flex flex-col mt-2">
@@ -521,127 +541,127 @@ function App() {
                       {`${settings.host}:${settings.port}`}
                     </small>
                   </div>
+                )}
 
-                  <div>
-                    <h3 className="text-lg font-medium mt-4">Voice</h3>
+                <div>
+                  <h3 className="text-lg font-medium">Voice</h3>
 
-                    <fieldset className="flex flex-col mt-2">
-                      <label htmlFor="voice-name">Name</label>
-                      <div className="flex">
-                        <Select.Root
-                          value={settings.voiceURI}
-                          onValueChange={(value) => {
-                            setSettings({
-                              ...settings,
-                              voiceURI: value,
-                            });
-                          }}
+                  <fieldset className="flex flex-col mt-2">
+                    <label htmlFor="voice-name">Name</label>
+                    <div className="flex">
+                      <Select.Root
+                        value={settings.voiceURI}
+                        onValueChange={(value) => {
+                          setSettings({
+                            ...settings,
+                            voiceURI: value,
+                          });
+                        }}
+                      >
+                        <Select.Trigger
+                          id="voice-name"
+                          className="inline-flex items-center justify-between border border-dark border-r-0 rounded-md rounded-r-none p-2 text-sm gap-1 bg-transparent flex-1"
+                          aria-label="Voice name"
                         >
-                          <Select.Trigger
-                            id="voice-name"
-                            className="inline-flex items-center justify-between border border-dark border-r-0 rounded-md rounded-r-none p-2 text-sm gap-1 bg-transparent flex-1"
-                            aria-label="Voice name"
-                          >
-                            <Select.Value />
-                            <Select.Icon>
+                          <Select.Value />
+                          <Select.Icon>
+                            <ChevronDown strokeWidth={1} />
+                          </Select.Icon>
+                        </Select.Trigger>
+                        <Select.Portal>
+                          <Select.Content className="overflow-hidden bg-light rounded-md border border-dark">
+                            <Select.ScrollUpButton className="flex items-center justify-center h-6 bg-light cursor-default">
+                              <ChevronUp strokeWidth={1} />
+                            </Select.ScrollUpButton>
+                            <Select.Viewport className="p-2">
+                              {Object.entries(availableVoices).map(
+                                ([group, voicesInGroup], index) => (
+                                  <Fragment key={group}>
+                                    {index > 0 && (
+                                      <Select.Separator className="h-px bg-dark m-1" />
+                                    )}
+
+                                    <Select.Group>
+                                      <Select.Label className="px-6 py-0 text-xs text-dark/50">
+                                        {group}
+                                      </Select.Label>
+                                      {voicesInGroup.map((voice) => (
+                                        <Select.Item
+                                          key={voice.voiceURI}
+                                          className="text-sm rounded flex items-center h-6 py-0 pl-6 pr-9 relative select-none data-[highlighted]:outline-none data-[highlighted]:bg-dark data-[highlighted]:text-light data-[disabled]:text-dark/50 data-[disabled]:pointer-events-none"
+                                          value={voice.voiceURI}
+                                        >
+                                          <Select.ItemText>
+                                            {voice.name}
+                                          </Select.ItemText>
+                                          <Select.ItemIndicator className="absolute left-0 w-6 inline-flex items-center justify-center">
+                                            <Check strokeWidth={1} />
+                                          </Select.ItemIndicator>
+                                        </Select.Item>
+                                      ))}
+                                    </Select.Group>
+                                  </Fragment>
+                                ),
+                              )}
+                            </Select.Viewport>
+                            <Select.ScrollDownButton className="flex items-center justify-center h-6 bg-light cursor-default">
                               <ChevronDown strokeWidth={1} />
-                            </Select.Icon>
-                          </Select.Trigger>
-                          <Select.Portal>
-                            <Select.Content className="overflow-hidden bg-light rounded-md border border-dark">
-                              <Select.ScrollUpButton className="flex items-center justify-center h-6 bg-light cursor-default">
-                                <ChevronUp strokeWidth={1} />
-                              </Select.ScrollUpButton>
-                              <Select.Viewport className="p-2">
-                                {Object.entries(availableVoices).map(
-                                  ([group, voicesInGroup], index) => (
-                                    <Fragment key={group}>
-                                      {index > 0 && (
-                                        <Select.Separator className="h-px bg-dark m-1" />
-                                      )}
+                            </Select.ScrollDownButton>
+                          </Select.Content>
+                        </Select.Portal>
+                      </Select.Root>
+                      <Button
+                        iconOnly={false}
+                        className="rounded-l-none"
+                        onClick={() => resetSetting('voiceURI')}
+                      >
+                        Reset
+                      </Button>
+                    </div>
+                  </fieldset>
 
-                                      <Select.Group>
-                                        <Select.Label className="px-6 py-0 text-xs text-dark/50">
-                                          {group}
-                                        </Select.Label>
-                                        {voicesInGroup.map((voice) => (
-                                          <Select.Item
-                                            key={voice.voiceURI}
-                                            className="text-sm rounded flex items-center h-6 py-0 pl-6 pr-9 relative select-none data-[highlighted]:outline-none data-[highlighted]:bg-dark data-[highlighted]:text-light data-[disabled]:text-dark/50 data-[disabled]:pointer-events-none"
-                                            value={voice.voiceURI}
-                                          >
-                                            <Select.ItemText>
-                                              {voice.name}
-                                            </Select.ItemText>
-                                            <Select.ItemIndicator className="absolute left-0 w-6 inline-flex items-center justify-center">
-                                              <Check strokeWidth={1} />
-                                            </Select.ItemIndicator>
-                                          </Select.Item>
-                                        ))}
-                                      </Select.Group>
-                                    </Fragment>
-                                  ),
-                                )}
-                              </Select.Viewport>
-                              <Select.ScrollDownButton className="flex items-center justify-center h-6 bg-light cursor-default">
-                                <ChevronDown strokeWidth={1} />
-                              </Select.ScrollDownButton>
-                            </Select.Content>
-                          </Select.Portal>
-                        </Select.Root>
-                        <Button
-                          iconOnly={false}
-                          className="rounded-l-none"
-                          onClick={() => resetSetting('voiceURI')}
-                        >
-                          Reset
-                        </Button>
+                  <fieldset className="flex flex-col mt-4">
+                    <label htmlFor="voice-speed">Speed</label>
+                    <div className="flex gap-x-4 items-center">
+                      <Slider.Root
+                        id="voice-speed"
+                        className="relative flex items-center select-none touch-none h-5 flex-1"
+                        value={[settings.voiceSpeed]}
+                        onValueChange={([newSpeed]) => {
+                          setSettings({ ...settings, voiceSpeed: newSpeed });
+                        }}
+                        max={2}
+                        min={0.5}
+                        step={0.1}
+                        aria-label="Voice speed"
+                      >
+                        <Slider.Track className="bg-dark relative flex-1 rounded-full h-1">
+                          <Slider.Range className="absolute bg-dark rounded-full h-full" />
+                        </Slider.Track>
+                        <Slider.Thumb className="block w-5 h-5 bg-light border border-dark rounded-full" />
+                      </Slider.Root>
+                      <div className="text-right">
+                        {`${settings.voiceSpeed.toFixed(2)}x`}
                       </div>
-                    </fieldset>
+                      <Button
+                        iconOnly={false}
+                        onClick={() => resetSetting('voiceSpeed')}
+                      >
+                        Reset
+                      </Button>
+                    </div>
+                  </fieldset>
 
-                    <fieldset className="flex flex-col mt-4">
-                      <label htmlFor="voice-speed">Speed</label>
-                      <div className="flex gap-x-4 items-center">
-                        <Slider.Root
-                          id="voice-speed"
-                          className="relative flex items-center select-none touch-none h-5 flex-1"
-                          value={[settings.voiceSpeed]}
-                          onValueChange={([newSpeed]) => {
-                            setSettings({ ...settings, voiceSpeed: newSpeed });
-                          }}
-                          max={2}
-                          min={0.5}
-                          step={0.1}
-                          aria-label="Voice speed"
-                        >
-                          <Slider.Track className="bg-dark relative flex-1 rounded-full h-1">
-                            <Slider.Range className="absolute bg-dark rounded-full h-full" />
-                          </Slider.Track>
-                          <Slider.Thumb className="block w-5 h-5 bg-light border border-dark rounded-full" />
-                        </Slider.Root>
-                        <div className="text-right">
-                          {`${settings.voiceSpeed.toFixed(2)}x`}
-                        </div>
-                        <Button
-                          iconOnly={false}
-                          onClick={() => resetSetting('voiceSpeed')}
-                        >
-                          Reset
-                        </Button>
-                      </div>
-                    </fieldset>
-
-                    <Button
-                      iconOnly={false}
-                      className="mt-2"
-                      onClick={() => speak('It was a dark and stormy night')}
-                    >
-                      <Headphones strokeWidth={1} />
-                      <span className="ml-1">Try speaking</span>
-                    </Button>
-                  </div>
+                  <Button
+                    iconOnly={false}
+                    className="mt-2"
+                    onClick={() => speak('It was a dark and stormy night')}
+                  >
+                    <Headphones strokeWidth={1} />
+                    <span className="ml-1">Try speaking</span>
+                  </Button>
                 </div>
-              )}
+              </div>
             </main>
 
             <Dialog.Close asChild>
