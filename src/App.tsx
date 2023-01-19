@@ -251,10 +251,10 @@ function App() {
     setIsProcessing(true);
 
     abortRef.current = new AbortController();
-    const endpoint = IS_LOCAL_SETUP_REQUIRED
-      ? `${settings.host}:${settings.port}/chatgpt/messages`
+    const host = IS_LOCAL_SETUP_REQUIRED
+      ? `${settings.host}:${settings.port}`
       : 'https://sonng-chatgpt.uksouth.cloudapp.azure.com';
-    fetch(endpoint, {
+    fetch(`${host}/chatgpt/messages`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
