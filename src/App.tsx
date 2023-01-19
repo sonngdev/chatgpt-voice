@@ -422,7 +422,7 @@ function App() {
           <Dialog.Overlay className="bg-dark/75 fixed inset-0 animate-fade-in" />
           <Dialog.Content className="bg-light border border-dark rounded-lg shadow-solid fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5/6 max-w-md max-h-screen p-6 animate-rise-up focus:outline-none overflow-y-auto lg:max-w-5xl">
             <Dialog.Title className="font-medium text-xl mb-4">
-              Help
+              Settings
             </Dialog.Title>
             <Dialog.Description>
               Set up local server on Desktop in 3 easy steps.
@@ -604,7 +604,7 @@ function App() {
                       <div className="flex gap-x-4 items-center">
                         <Slider.Root
                           id="voice-speed"
-                          className="relative flex items-center select-none touch-none w-48 h-5 flex-1"
+                          className="relative flex items-center select-none touch-none h-5 flex-1"
                           value={[settings.voiceSpeed]}
                           onValueChange={([newSpeed]) => {
                             setSettings({ ...settings, voiceSpeed: newSpeed });
@@ -630,16 +630,16 @@ function App() {
                         </Button>
                       </div>
                     </fieldset>
-                  </div>
 
-                  <Button
-                    iconOnly={false}
-                    className="mt-2"
-                    onClick={() => speak('It was a dark and stormy night')}
-                  >
-                    <Headphones strokeWidth={1} />
-                    <span className="ml-1">Try speaking</span>
-                  </Button>
+                    <Button
+                      iconOnly={false}
+                      className="mt-2"
+                      onClick={() => speak('It was a dark and stormy night')}
+                    >
+                      <Headphones strokeWidth={1} />
+                      <span className="ml-1">Try speaking</span>
+                    </Button>
+                  </div>
                 </div>
               )}
             </main>
