@@ -34,6 +34,7 @@ import Button from './design_system/Button';
 import SyntaxHighlighter from './design_system/SyntaxHighlighter';
 import Message from './Message';
 import * as Storage from './storage';
+import usePrevious from './hooks/usePrevious';
 
 interface CreateChatGPTMessageResponse {
   answer: string;
@@ -60,6 +61,7 @@ function App() {
     listening: isListening,
     finalTranscript,
   } = useSpeechRecognition();
+  const prevFinalTranscript = usePrevious(finalTranscript);
 
   const initialMessages: Message[] = [
     { type: 'response', text: 'Try speaking to the microphone.' },
@@ -210,60 +212,63 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (finalTranscript) {
-      setMessages((oldMessages) => [
-        ...oldMessages,
-        { type: 'prompt', text: finalTranscript },
-      ]);
-      setIsProcessing(true);
-
-      abortRef.current = new AbortController();
-      fetch(`${settings.host}:${settings.port}/chatgpt/messages`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          text: finalTranscript,
-          conversationId: conversationRef.current.id || undefined,
-          parentMessageId:
-            conversationRef.current.currentMessageId || undefined,
-        }),
-        signal: abortRef.current.signal,
-      })
-        .then((res) => res.json())
-        .then((res: CreateChatGPTMessageResponse) => {
-          conversationRef.current.id = res.conversationId;
-          conversationRef.current.currentMessageId = res.messageId;
-          setMessages((oldMessages) => [
-            ...oldMessages,
-            { type: 'response', text: res.answer },
-          ]);
-          speak(res.answer);
-        })
-        .catch((err: unknown) => {
-          console.warn(err);
-          let response: string;
-
-          // Connection refused
-          if (err instanceof TypeError) {
-            response =
-              'Local server needs to be set up first. Click on the Settings button to see how.';
-            setIsTooltipVisible(true);
-          } else {
-            response = 'Failed to get the response, please try again.';
-          }
-          setMessages((oldMessages) => [
-            ...oldMessages,
-            { type: 'response', text: response },
-          ]);
-          speak(response);
-        })
-        .finally(() => {
-          setIsProcessing(false);
-        });
+    // Only run effect if finalTranscript change from undefined or ''
+    // to a non-empty string.
+    if (prevFinalTranscript || !finalTranscript) {
+      return;
     }
-  }, [finalTranscript, settings, speak]);
+
+    setMessages((oldMessages) => [
+      ...oldMessages,
+      { type: 'prompt', text: finalTranscript },
+    ]);
+    setIsProcessing(true);
+
+    abortRef.current = new AbortController();
+    fetch(`${settings.host}:${settings.port}/chatgpt/messages`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        text: finalTranscript,
+        conversationId: conversationRef.current.id || undefined,
+        parentMessageId: conversationRef.current.currentMessageId || undefined,
+      }),
+      signal: abortRef.current.signal,
+    })
+      .then((res) => res.json())
+      .then((res: CreateChatGPTMessageResponse) => {
+        conversationRef.current.id = res.conversationId;
+        conversationRef.current.currentMessageId = res.messageId;
+        setMessages((oldMessages) => [
+          ...oldMessages,
+          { type: 'response', text: res.answer },
+        ]);
+        speak(res.answer);
+      })
+      .catch((err: unknown) => {
+        console.warn(err);
+        let response: string;
+
+        // Connection refused
+        if (err instanceof TypeError) {
+          response =
+            'Local server needs to be set up first. Click on the Settings button to see how.';
+          setIsTooltipVisible(true);
+        } else {
+          response = 'Failed to get the response, please try again.';
+        }
+        setMessages((oldMessages) => [
+          ...oldMessages,
+          { type: 'response', text: response },
+        ]);
+        speak(response);
+      })
+      .finally(() => {
+        setIsProcessing(false);
+      });
+  }, [prevFinalTranscript, finalTranscript, settings, speak]);
 
   if (!browserSupportsSpeechRecognition) {
     return (
