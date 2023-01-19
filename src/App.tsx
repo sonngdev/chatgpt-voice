@@ -28,7 +28,7 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Slider from '@radix-ui/react-slider';
 import * as Select from '@radix-ui/react-select';
-import { isDesktop, isMobile } from 'react-device-detect';
+import { isDesktop, isMobile, isSafari } from 'react-device-detect';
 
 import Button from './design_system/Button';
 import SyntaxHighlighter from './design_system/SyntaxHighlighter';
@@ -188,21 +188,41 @@ function App() {
   useEffect(() => {
     const updateVoiceSettings = () => {
       const newVoices = window.speechSynthesis.getVoices();
-      const defaultVoice = newVoices.find((voice) => voice.default);
+      const defaultVoice = newVoices.find(
+        (voice) => voice.default && voice.lang.startsWith('en-'),
+      );
       setVoices(newVoices);
       setSettings((oldSettings) => {
-        if (!defaultVoice || oldSettings.voiceURI) {
+        // If a preferred voice is already set, keep it
+        if (oldSettings.voiceURI) {
           return oldSettings;
         }
         return {
           ...oldSettings,
-          voiceURI: defaultVoice.voiceURI,
+          voiceURI: defaultVoice ? defaultVoice.voiceURI : '',
         };
       });
       if (defaultVoice) {
         defaultSettingsRef.current.voiceURI = defaultVoice.voiceURI;
       }
     };
+
+    // Safari doesn't support `voiceschanged` event, so we have to
+    // periodically check if voices are loaded.
+    // So is any mobile browser on iOS.
+    if (isSafari || isMobile) {
+      let interval = setInterval(() => {
+        const newVoices = window.speechSynthesis.getVoices();
+        if (newVoices.length > 0) {
+          clearInterval(interval);
+          updateVoiceSettings();
+        }
+      }, 100);
+      // Stop checking after 10 seconds
+      setTimeout(() => clearInterval(interval), 10_000);
+
+      return () => clearInterval(interval);
+    }
 
     window.speechSynthesis.addEventListener(
       'voiceschanged',
