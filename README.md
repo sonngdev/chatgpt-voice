@@ -1,11 +1,34 @@
-# ChatGPT With Voice
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/28614996/213590740-dedbc53f-9f79-4166-9371-86e6e3f25be6.png#gh-light-mode-only" height="250">
+  <img src="https://user-images.githubusercontent.com/28614996/213590704-25bbb1d7-aca4-4238-8eb0-7bcd1d18c9d3.png#gh-dark-mode-only" height="250">
+</p>
 
-<img width="800" alt="Screenshot 2023-01-14 at 10 10 16 p m" src="https://user-images.githubusercontent.com/28614996/212499277-77dc579e-6cad-4a87-9426-7c962d99b992.png">
+<hr />
 
-Check out the website [here](https://chatgpt.sonng.dev). 
+<p align="center">
+  Have a conversation with ChatGPT. Casually 🔈 🤖 ⚡️
+<p>
 
-## Set up local server
+<p align="center">
+ <a href="https://chatgpt.sonng.dev/">Website</a> | <a href="https://github.com/thanhsonng/chatgpt-server">Backend</a>
+</p
 
-🏗️ This is only a frontend app. In order to work correctly, it requires a backend server. 
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/28614996/213593667-74bf3d01-333c-4e87-a71f-e7cbe2de4c21.png" alt="Website screenshot">
+<p align="center">
 
-👨‍💻 Currently, you need to set up the server yourself – but I promise it will be easy. Just follow the 3-step guide in [my backend repo](https://github.com/thanhsonng/chatgpt-server) and your are good to go.
+## Features
+- 📣 Conversation with ChatGPT, with full context, in a neat UI.
+- 🛠️ Customizable voice and speech rate.
+
+## Development
+You can also set up this project locally to play with it, contribute to it or hack it to your heart's content. Simply clone it, install dependencies then start the dev server. 
+
+```bash
+git clone https://github.com/thanhsonng/chatgpt-voice.git
+cd chatgpt-voice
+npm run install
+npm run dev
+```
+
+[A backend server](https://github.com/thanhsonng/chatgpt-server) accompanies this frontend client. See its `README` file for installation guide.
