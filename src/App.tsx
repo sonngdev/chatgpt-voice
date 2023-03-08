@@ -38,7 +38,6 @@ import usePrevious from './hooks/usePrevious';
 
 interface CreateChatGPTMessageResponse {
   answer: string;
-  conversationId: string;
   messageId: string;
 }
 
@@ -93,7 +92,7 @@ function App() {
   );
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const abortRef = useRef<AbortController | null>(null);
-  const conversationRef = useRef({ id: '', currentMessageId: '' });
+  const conversationRef = useRef({ currentMessageId: '' });
   const bottomDivRef = useRef<HTMLDivElement>(null);
 
   const availableVoices = useMemo(() => {
@@ -153,7 +152,7 @@ function App() {
   const resetConversation = () => {
     setIsProcessing(false);
     setMessages(initialMessages);
-    conversationRef.current = { id: '', currentMessageId: '' };
+    conversationRef.current = { currentMessageId: '' };
 
     window.speechSynthesis.cancel();
     SpeechRecognition.abortListening();
@@ -261,14 +260,12 @@ function App() {
       },
       body: JSON.stringify({
         text: finalTranscript,
-        conversationId: conversationRef.current.id || undefined,
         parentMessageId: conversationRef.current.currentMessageId || undefined,
       }),
       signal: abortRef.current.signal,
     })
       .then((res) => res.json())
       .then((res: CreateChatGPTMessageResponse) => {
-        conversationRef.current.id = res.conversationId;
         conversationRef.current.currentMessageId = res.messageId;
         setMessages((oldMessages) => [
           ...oldMessages,
