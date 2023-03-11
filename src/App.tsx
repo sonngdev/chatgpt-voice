@@ -32,10 +32,10 @@ import { isDesktop, isMobile, isSafari } from 'react-device-detect';
 
 import Button from './design_system/Button';
 import SyntaxHighlighter from './design_system/SyntaxHighlighter';
-import Message from './Message';
-import * as Storage from './storage';
+import Message from './design_system/Message';
+import * as Storage from './utils/storage';
 import usePrevious from './hooks/usePrevious';
-import Config from './config';
+import Config from './utils/config';
 
 interface CreateChatGPTMessageResponse {
   answer: string;
