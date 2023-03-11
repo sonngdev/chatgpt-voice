@@ -28,7 +28,7 @@ import * as Tooltip from '@radix-ui/react-tooltip';
 import * as Dialog from '@radix-ui/react-dialog';
 import * as Slider from '@radix-ui/react-slider';
 import * as Select from '@radix-ui/react-select';
-import { isDesktop, isMobile, isSafari } from 'react-device-detect';
+import { isDesktop, isMobile } from 'react-device-detect';
 
 import Button from './design_system/Button';
 import SyntaxHighlighter from './design_system/SyntaxHighlighter';
@@ -36,6 +36,7 @@ import Message from './design_system/Message';
 import * as Storage from './utils/storage';
 import usePrevious from './hooks/usePrevious';
 import Config from './utils/config';
+import useVoices from './hooks/useVoices';
 
 interface CreateChatGPTMessageResponse {
   answer: string;
@@ -87,7 +88,7 @@ function App() {
   const [isTooltipVisible, setIsTooltipVisible] = useState(
     Config.IS_LOCAL_SETUP_REQUIRED,
   );
-  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
+  const { voices, defaultVoice } = useVoices();
   const abortRef = useRef<AbortController | null>(null);
   const conversationRef = useRef({ currentMessageId: '' });
   const bottomDivRef = useRef<HTMLDivElement>(null);
@@ -180,58 +181,23 @@ function App() {
     bottomDivRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages.length]);
 
-  // Display voices when they become available
   useEffect(() => {
-    const updateVoiceSettings = () => {
-      const newVoices = window.speechSynthesis.getVoices();
-      const defaultVoice = newVoices.find(
-        (voice) => voice.default && voice.lang.startsWith('en-'),
-      );
-      setVoices(newVoices);
-      setSettings((oldSettings) => {
-        // If a preferred voice is already set, keep it
-        if (oldSettings.voiceURI) {
-          return oldSettings;
-        }
-        return {
-          ...oldSettings,
-          voiceURI: defaultVoice ? defaultVoice.voiceURI : '',
-        };
-      });
-      if (defaultVoice) {
-        defaultSettingsRef.current.voiceURI = defaultVoice.voiceURI;
-      }
-    };
-
-    // Safari doesn't support `voiceschanged` event, so we have to
-    // periodically check if voices are loaded.
-    // So is any mobile browser on iOS.
-    if (isSafari || isMobile) {
-      let interval = setInterval(() => {
-        const newVoices = window.speechSynthesis.getVoices();
-        if (newVoices.length > 0) {
-          clearInterval(interval);
-          updateVoiceSettings();
-        }
-      }, 100);
-      // Stop checking after 10 seconds
-      setTimeout(() => clearInterval(interval), 10_000);
-
-      return () => clearInterval(interval);
+    if (!defaultVoice) {
+      return;
     }
 
-    window.speechSynthesis.addEventListener(
-      'voiceschanged',
-      updateVoiceSettings,
-    );
-
-    return () => {
-      window.speechSynthesis.removeEventListener(
-        'voiceschanged',
-        updateVoiceSettings,
-      );
-    };
-  }, []);
+    defaultSettingsRef.current.voiceURI = defaultVoice.voiceURI;
+    setSettings((oldSettings) => {
+      // If a preferred voice is already set, keep it
+      if (oldSettings.voiceURI) {
+        return oldSettings;
+      }
+      return {
+        ...oldSettings,
+        voiceURI: defaultVoice.voiceURI,
+      };
+    });
+  }, [defaultVoice]);
 
   useEffect(() => {
     // Only run effect if finalTranscript change from undefined or ''
