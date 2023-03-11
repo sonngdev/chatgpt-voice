@@ -236,6 +236,11 @@ function App() {
         console.warn(err);
         let response: string;
 
+        // Ignore aborted request
+        if (abortController.signal.aborted) {
+          return;
+        }
+
         // Connection refused
         if (err instanceof TypeError && Config.IS_LOCAL_SETUP_REQUIRED) {
           response =
