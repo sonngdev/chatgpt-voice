@@ -33,9 +33,10 @@ import { isDesktop, isMobile } from 'react-device-detect';
 import Button from './design_system/Button';
 import SyntaxHighlighter from './design_system/SyntaxHighlighter';
 import Message from './design_system/Message';
-import * as Storage from './utils/storage';
+import API from './lib/api';
+import Config from './lib/config';
+import * as Storage from './lib/storage';
 import usePrevious from './hooks/usePrevious';
-import Config from './utils/config';
 import useVoices from './hooks/useVoices';
 
 interface CreateChatGPTMessageResponse {
@@ -212,21 +213,16 @@ function App() {
     ]);
     setIsProcessing(true);
 
-    abortRef.current = new AbortController();
     const host = Config.IS_LOCAL_SETUP_REQUIRED
       ? `${settings.host}:${settings.port}`
       : Config.API_HOST;
-    fetch(`${host}/chatgpt/messages`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        text: finalTranscript,
-        parentMessageId: conversationRef.current.currentMessageId || undefined,
-      }),
-      signal: abortRef.current.signal,
-    })
+    const { response, abortController } = API.sendMessage(host, {
+      text: finalTranscript,
+      parentMessageId: conversationRef.current.currentMessageId || undefined,
+    });
+    abortRef.current = abortController;
+
+    response
       .then((res) => res.json())
       .then((res: CreateChatGPTMessageResponse) => {
         conversationRef.current.currentMessageId = res.messageId;
