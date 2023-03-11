@@ -35,6 +35,7 @@ import SyntaxHighlighter from './design_system/SyntaxHighlighter';
 import Message from './Message';
 import * as Storage from './storage';
 import usePrevious from './hooks/usePrevious';
+import Config from './config';
 
 interface CreateChatGPTMessageResponse {
   answer: string;
@@ -49,10 +50,6 @@ interface Message {
 interface VoiceMappings {
   [group: string]: SpeechSynthesisVoice[];
 }
-
-// Disable local server setup instruction because we have a
-// backend server running. This might change in the future.
-const IS_LOCAL_SETUP_REQUIRED = false;
 
 const savedData = Storage.load();
 
@@ -88,7 +85,7 @@ function App() {
   });
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isTooltipVisible, setIsTooltipVisible] = useState(
-    IS_LOCAL_SETUP_REQUIRED,
+    Config.IS_LOCAL_SETUP_REQUIRED,
   );
   const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
   const abortRef = useRef<AbortController | null>(null);
@@ -250,9 +247,9 @@ function App() {
     setIsProcessing(true);
 
     abortRef.current = new AbortController();
-    const host = IS_LOCAL_SETUP_REQUIRED
+    const host = Config.IS_LOCAL_SETUP_REQUIRED
       ? `${settings.host}:${settings.port}`
-      : 'https://sonng-chatgpt.uksouth.cloudapp.azure.com';
+      : Config.API_HOST;
     fetch(`${host}/chatgpt/messages`, {
       method: 'POST',
       headers: {
@@ -278,7 +275,7 @@ function App() {
         let response: string;
 
         // Connection refused
-        if (err instanceof TypeError && IS_LOCAL_SETUP_REQUIRED) {
+        if (err instanceof TypeError && Config.IS_LOCAL_SETUP_REQUIRED) {
           response =
             'Local server needs to be set up first. Click on the Settings button to see how.';
           setIsTooltipVisible(true);
@@ -448,21 +445,21 @@ function App() {
           <Dialog.Overlay className="bg-dark/75 fixed inset-0 animate-fade-in" />
           <Dialog.Content
             className={`bg-light border border-dark rounded-lg shadow-solid fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5/6 max-w-md max-h-screen p-6 animate-rise-up focus:outline-none overflow-y-auto ${
-              IS_LOCAL_SETUP_REQUIRED ? 'lg:max-w-5xl' : ''
+              Config.IS_LOCAL_SETUP_REQUIRED ? 'lg:max-w-5xl' : ''
             }`}
           >
             <Dialog.Title className="font-medium text-xl mb-4">
               Settings
             </Dialog.Title>
 
-            {IS_LOCAL_SETUP_REQUIRED && (
+            {Config.IS_LOCAL_SETUP_REQUIRED && (
               <Dialog.Description>
                 Set up local server on Desktop in 3 easy steps.
               </Dialog.Description>
             )}
 
             <main className="lg:flex lg:gap-x-12">
-              {IS_LOCAL_SETUP_REQUIRED && (
+              {Config.IS_LOCAL_SETUP_REQUIRED && (
                 <div>
                   <h3 className="text-lg font-medium mt-3">Step 1</h3>
                   <p>
@@ -503,7 +500,7 @@ function App() {
               )}
 
               <div className="lg:w-full">
-                {IS_LOCAL_SETUP_REQUIRED && isDesktop && (
+                {Config.IS_LOCAL_SETUP_REQUIRED && isDesktop && (
                   <div className="mb-4">
                     <h3 className="text-lg font-medium mt-3">Server</h3>
 
