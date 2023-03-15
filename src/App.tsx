@@ -33,7 +33,7 @@ import SyntaxHighlighter from './design_system/SyntaxHighlighter';
 import Message from './design_system/Message';
 import API from './lib/api';
 import Config from './lib/config';
-import * as Storage from './lib/storage';
+import Storage from './lib/storage';
 import Voice from './lib/voice';
 import usePrevious from './hooks/usePrevious';
 import useVoices from './hooks/useVoices';
