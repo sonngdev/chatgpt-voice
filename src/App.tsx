@@ -167,14 +167,19 @@ function App() {
   };
 
   useEffect(() => {
-    if (listening) {
-      setState(State.LISTENING);
-    } else if (finalTranscript) {
-      setState(State.PROCESSING);
-    } else {
-      setState(State.IDLE);
-    }
-  }, [listening, finalTranscript]);
+    setState((oldState) => {
+      if (listening) {
+        return State.LISTENING;
+      }
+      if (
+        (oldState === State.LISTENING && transcript) || // At this point finalTranscript may not have a value yet
+        oldState === State.PROCESSING // Avoid setting state to IDLE when transcript is set to '' while processing
+      ) {
+        return State.PROCESSING;
+      }
+      return State.IDLE;
+    });
+  }, [listening, transcript, finalTranscript]);
 
   // Scroll to bottom when user is speaking a prompt
   useEffect(() => {
@@ -207,7 +212,7 @@ function App() {
   }, [defaultVoice]);
 
   useEffect(() => {
-    if (state !== State.PROCESSING) {
+    if (state !== State.PROCESSING || !finalTranscript) {
       return;
     }
 
@@ -289,18 +294,25 @@ function App() {
       <main className="flex-1 flex flex-col gap-y-4 overflow-y-auto lg:mr-80 lg:gap-y-8">
         {messages.map(({ type, text }, index) => {
           const getIsActive = () => {
-            if (state === State.LISTENING) {
-              return false;
+            switch (state) {
+              case State.IDLE: {
+                if (type === 'prompt') {
+                  return index === messages.length - 2;
+                } else if (type === 'response') {
+                  return index === messages.length - 1;
+                }
+                return false;
+              }
+
+              case State.LISTENING:
+                return false;
+
+              case State.PROCESSING:
+                return type === 'prompt' && index === messages.length - 1;
+
+              default:
+                return false;
             }
-            if (type === 'prompt') {
-              return (
-                index === messages.length - 1 || index === messages.length - 2
-              );
-            }
-            if (type === 'response') {
-              return index === messages.length - 1;
-            }
-            return false;
           };
           return (
             <Message
