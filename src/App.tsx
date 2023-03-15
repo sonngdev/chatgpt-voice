@@ -6,9 +6,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import SpeechRecognition, {
-  useSpeechRecognition,
-} from 'react-speech-recognition';
+import { useSpeechRecognition } from 'react-speech-recognition';
 import {
   GitHub,
   Settings,
@@ -36,6 +34,7 @@ import Message from './design_system/Message';
 import API from './lib/api';
 import Config from './lib/config';
 import * as Storage from './lib/storage';
+import Voice from './lib/voice';
 import usePrevious from './hooks/usePrevious';
 import useVoices from './hooks/useVoices';
 
@@ -128,22 +127,15 @@ function App() {
 
   const recognizeSpeech = () => {
     if (isListening) {
-      SpeechRecognition.stopListening();
+      Voice.stopListening();
     } else {
-      window.speechSynthesis.cancel();
-      SpeechRecognition.startListening();
+      Voice.startListening();
     }
   };
 
   const speak = useCallback(
     (text: string) => {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      if (selectedVoice) {
-        utterance.voice = selectedVoice;
-      }
-      utterance.rate = settings.voiceSpeed;
-      window.speechSynthesis.speak(utterance);
+      Voice.speak(text, { voice: selectedVoice, rate: settings.voiceSpeed });
     },
     [selectedVoice, settings.voiceSpeed],
   );
@@ -153,8 +145,7 @@ function App() {
     setMessages(initialMessages);
     conversationRef.current = { currentMessageId: '' };
 
-    window.speechSynthesis.cancel();
-    SpeechRecognition.abortListening();
+    Voice.idle();
     abortRef.current?.abort();
   };
 
