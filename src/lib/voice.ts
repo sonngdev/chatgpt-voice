@@ -6,6 +6,15 @@ interface SpeakOptions {
 }
 
 class VoiceManager {
+  private isAutoplayEnabled = false;
+
+  enableAutoplay() {
+    if (!this.isAutoplayEnabled) {
+      this.speak('');
+      this.isAutoplayEnabled = true;
+    }
+  }
+
   startListening() {
     window.speechSynthesis.cancel();
     SpeechRecognition.startListening();

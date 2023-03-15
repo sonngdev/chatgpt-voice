@@ -129,6 +129,7 @@ function App() {
     if (isListening) {
       Voice.stopListening();
     } else {
+      Voice.enableAutoplay();
       Voice.startListening();
     }
   };
