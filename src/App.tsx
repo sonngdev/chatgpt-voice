@@ -35,7 +35,6 @@ import API from './lib/api';
 import Config from './lib/config';
 import Storage from './lib/storage';
 import Voice from './lib/voice';
-import usePrevious from './hooks/usePrevious';
 import useVoices from './hooks/useVoices';
 
 interface CreateChatGPTMessageResponse {
@@ -52,6 +51,12 @@ interface VoiceMappings {
   [group: string]: SpeechSynthesisVoice[];
 }
 
+enum State {
+  IDLE,
+  LISTENING,
+  PROCESSING,
+}
+
 const savedData = Storage.load();
 
 function App() {
@@ -59,10 +64,9 @@ function App() {
     browserSupportsSpeechRecognition,
     isMicrophoneAvailable,
     transcript,
-    listening: isListening,
+    listening,
     finalTranscript,
   } = useSpeechRecognition();
-  const prevFinalTranscript = usePrevious(finalTranscript);
 
   const initialMessages: Message[] = [
     { type: 'response', text: 'Try speaking to the microphone.' },
@@ -73,7 +77,7 @@ function App() {
     voiceURI: '',
     voiceSpeed: 1,
   });
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [state, setState] = useState(State.IDLE);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [settings, setSettings] = useState({
     host: (savedData?.host as string) ?? defaultSettingsRef.current.host,
@@ -126,11 +130,11 @@ function App() {
   }, [voices, settings.voiceURI]);
 
   const recognizeSpeech = () => {
-    if (isListening) {
-      Voice.stopListening();
-    } else {
+    if (state === State.IDLE) {
       Voice.enableAutoplay();
       Voice.startListening();
+    } else if (state === State.LISTENING) {
+      Voice.stopListening();
     }
   };
 
@@ -142,7 +146,7 @@ function App() {
   );
 
   const resetConversation = () => {
-    setIsProcessing(false);
+    setState(State.IDLE);
     setMessages(initialMessages);
     conversationRef.current = { currentMessageId: '' };
 
@@ -162,12 +166,22 @@ function App() {
     });
   };
 
+  useEffect(() => {
+    if (listening) {
+      setState(State.LISTENING);
+    } else if (finalTranscript) {
+      setState(State.PROCESSING);
+    } else {
+      setState(State.IDLE);
+    }
+  }, [listening, finalTranscript]);
+
   // Scroll to bottom when user is speaking a prompt
   useEffect(() => {
-    if (isListening) {
+    if (state === State.LISTENING) {
       bottomDivRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [isListening]);
+  }, [state]);
 
   // Scroll to bottom when there is a new response
   useEffect(() => {
@@ -193,9 +207,7 @@ function App() {
   }, [defaultVoice]);
 
   useEffect(() => {
-    // Only run effect if finalTranscript change from undefined or ''
-    // to a non-empty string.
-    if (prevFinalTranscript || !finalTranscript) {
+    if (state !== State.PROCESSING) {
       return;
     }
 
@@ -203,7 +215,6 @@ function App() {
       ...oldMessages,
       { type: 'prompt', text: finalTranscript },
     ]);
-    setIsProcessing(true);
 
     const host = Config.IS_LOCAL_SETUP_REQUIRED
       ? `${settings.host}:${settings.port}`
@@ -248,9 +259,9 @@ function App() {
         speak(response);
       })
       .finally(() => {
-        setIsProcessing(false);
+        setState(State.IDLE);
       });
-  }, [prevFinalTranscript, finalTranscript, settings, speak]);
+  }, [state, finalTranscript, settings, speak]);
 
   if (!browserSupportsSpeechRecognition) {
     return (
@@ -278,7 +289,7 @@ function App() {
       <main className="flex-1 flex flex-col gap-y-4 overflow-y-auto lg:mr-80 lg:gap-y-8">
         {messages.map(({ type, text }, index) => {
           const getIsActive = () => {
-            if (isListening) {
+            if (state === State.LISTENING) {
               return false;
             }
             if (type === 'prompt') {
@@ -301,7 +312,9 @@ function App() {
             />
           );
         })}
-        {isListening && <Message type="prompt" text={transcript} isActive />}
+        {state === State.LISTENING && (
+          <Message type="prompt" text={transcript} isActive />
+        )}
         <div ref={bottomDivRef} />
       </main>
 
@@ -363,33 +376,37 @@ function App() {
           <button
             type="button"
             className={`w-16 h-16 ${
-              isListening
+              state === State.IDLE
+                ? 'bg-dark'
+                : state === State.LISTENING
                 ? 'bg-accent1'
-                : isProcessing
+                : state === State.PROCESSING
                 ? 'bg-accent2'
-                : 'bg-dark'
+                : ''
             } text-light flex justify-center items-center rounded-full transition-all hover:opacity-80 focus:opacity-80`}
             onClick={recognizeSpeech}
-            disabled={isProcessing}
+            disabled={state === State.PROCESSING}
             aria-label={
-              isListening
+              state === State.IDLE
+                ? 'Start speaking'
+                : state === State.LISTENING
                 ? 'Listening'
-                : isProcessing
+                : state === State.PROCESSING
                 ? 'Processing'
-                : 'Start speaking'
+                : ''
             }
           >
-            {isListening ? (
+            {state === State.IDLE ? (
+              <Mic strokeWidth={1} size={32} />
+            ) : state === State.LISTENING ? (
               <div className="animate-blink">
                 <Activity strokeWidth={1} size={32} />
               </div>
-            ) : isProcessing ? (
+            ) : state === State.PROCESSING ? (
               <div className="animate-spin-2">
                 <Loader strokeWidth={1} size={32} />
               </div>
-            ) : (
-              <Mic strokeWidth={1} size={32} />
-            )}
+            ) : null}
           </button>
 
           <Button aria-label="New conversation" onClick={resetConversation}>
