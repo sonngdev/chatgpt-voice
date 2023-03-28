@@ -18,16 +18,18 @@
 <p align="center">
 
 ## Features
+
 - 📣 Conversation with ChatGPT, with full context, in a neat UI.
 - 🛠️ Customizable voice and speech rate.
 
 ## Development
-You can also set up this project locally to play with it, contribute to it or hack it to your heart's content. Simply clone it, install dependencies then start the dev server. 
+
+You can also set up this project locally to play with it, contribute to it or hack it to your heart's content. Simply clone it, install dependencies then start the dev server.
 
 ```bash
 git clone https://github.com/thanhsonng/chatgpt-voice.git
 cd chatgpt-voice
-npm run install
+npm install
 npm run dev
 ```
 
