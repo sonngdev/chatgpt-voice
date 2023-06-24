@@ -47,7 +47,7 @@ export default function Message({
           </span>
         )}
       </div>
-      <div className="font-medium text-2xl">{text}</div>
+      <div className="font-medium text-2xl" dangerouslySetInnerHTML={{ __html: text.replace(/\n/g, '<br />') }}></div>
     </div>
   );
 }
