@@ -36,6 +36,7 @@ import Config from './lib/config';
 import Storage from './lib/storage';
 import Voice from './lib/voice';
 import useVoices from './hooks/useVoices';
+import textToSpeech from "./lib/eleven_labs";
 
 interface CreateChatGPTMessageResponse {
   answer: string;
@@ -238,7 +239,7 @@ function App() {
           ...oldMessages,
           { type: 'response', text: res.answer },
         ]);
-        speak(res.answer);
+        textToSpeech(res.answer);
       })
       .catch((err: unknown) => {
         console.warn(err);
