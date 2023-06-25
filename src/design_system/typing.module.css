@@ -1,0 +1,7 @@
+.blinking-cursor {
+  animation: blink 0.75s step-end infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0 }
+}
