@@ -285,7 +285,7 @@ function App() {
           <div className="inline-block w-4 h-7 ml-2 align-middle bg-dark/40 animate-blink" />
         </h1>
         <div className="mt-4 flex justify-center lg:px-2">
-          <a href="https://github.com/thanhsonng/chatgpt-voice" target="_blank">
+          <a href="https://github.com/sonngdev/chatgpt-voice" target="_blank">
             <GitHub strokeWidth={1} />
           </a>
         </div>
@@ -454,7 +454,7 @@ function App() {
                     Clone <code>chatgpt-server</code> repo.
                   </p>
                   <SyntaxHighlighter language="bash">
-                    git clone https://github.com/thanhsonng/chatgpt-server.git
+                    git clone https://github.com/sonngdev/chatgpt-server.git
                   </SyntaxHighlighter>
 
                   <h3 className="text-lg font-medium mt-3">Step 2</h3>
