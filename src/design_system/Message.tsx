@@ -1,5 +1,6 @@
 import { KeyboardEventHandler } from 'react';
 import { DollarSign, Terminal } from 'react-feather';
+import Typewriter from './typewriter';
 
 interface MessageProps {
   type: 'prompt' | 'response';
@@ -47,7 +48,13 @@ export default function Message({
           </span>
         )}
       </div>
-      <div className="font-medium text-2xl">{text}</div>
+      <div className="font-medium text-2xl">
+        {type === 'response' ? (
+          <Typewriter text={text} typingDelay={250} />
+        ) : (
+          <span>{text}</span>
+        )}
+      </div>
     </div>
   );
 }
